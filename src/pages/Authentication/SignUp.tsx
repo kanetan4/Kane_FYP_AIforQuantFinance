@@ -86,17 +86,6 @@ const SignUp: React.FC = () => {
     }
   };
 
-  // const handleSignUp = (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-
-  //   const buttonClicked = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
-  //   if (buttonClicked.value === "normalSignUp") {
-  //     handleNormalSignUp();
-  //   } else if (buttonClicked.value === "googleSignUp") {
-  //     handleGoogleSignUp();
-  //   }
-  // };
-
   return (
     <>
       <Breadcrumb pageName="Sign Up" />

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../../firebaseConfig"; // Import Firebase Auth
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "../../../firebaseConfig"; // Import Firebase Auth
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import LogoDark from '../../images/logo/logo-dark.svg';
 import Logo from '../../images/logo/logo.svg';
@@ -68,6 +68,21 @@ const SignIn: React.FC = () => {
         handleAuthError(error.code);
       });
 
+  };
+
+  const handleGoogleSignIn = async () => {
+    setError(null);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      console.log("Google Sign-In successful:", user);
+
+      // Optionally redirect the user after successful sign-in
+      navigate("/"); // Change to your desired route
+    } catch (error: any) {
+      console.error("Google Sign-In error:", error);
+      setError(error.message);
+    }
   };
 
   return (
@@ -299,7 +314,7 @@ const SignIn: React.FC = () => {
                   >Sign In</button>
                 </div>
 
-                <button className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50">
+                <button type="button" onClick={handleGoogleSignIn} className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50">
                   <span>
                     <svg
                       width="20"

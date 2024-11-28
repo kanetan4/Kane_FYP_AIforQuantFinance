@@ -1,10 +1,75 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "../../../firebaseConfig";
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import LogoDark from '../../images/logo/logo-dark.svg';
 import Logo from '../../images/logo/logo.svg';
+import "./signup.css"
 
 const SignUp: React.FC = () => {
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!email || !validateEmail(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (!password || password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    if (!name.trim()) {
+      setError("Name is required.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      // Update user's display name
+      await updateProfile(user, { displayName: name });
+
+      console.log("User created successfully:", user);
+      setLoading(false);
+
+      // Navigate to another page after successful sign-up
+      navigate("/"); // Update route as necessary
+    } catch (error: any) {
+      console.error("Sign up error:", error);
+      setError(error.message);
+      setLoading(false);
+    }
+  };
+
+
   return (
     <>
       <Breadcrumb pageName="Sign Up" />
@@ -151,10 +216,11 @@ const SignUp: React.FC = () => {
             <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
               <span className="mb-1.5 block font-medium">Start for free</span>
               <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-                Sign Up to TailAdmin
+                Sign Up
               </h2>
 
-              <form>
+              <form onSubmit={handleSignUp}>
+                {error && <p className="error-message">{error}</p>}
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
                     Name
@@ -163,6 +229,9 @@ const SignUp: React.FC = () => {
                     <input
                       type="text"
                       placeholder="Enter your full name"
+                      onChange={(e) => setName(e.target.value)}
+                      value={name}
+                      required
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     />
 
@@ -198,6 +267,9 @@ const SignUp: React.FC = () => {
                     <input
                       type="email"
                       placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     />
 
@@ -229,6 +301,9 @@ const SignUp: React.FC = () => {
                     <input
                       type="password"
                       placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     />
 
@@ -264,6 +339,9 @@ const SignUp: React.FC = () => {
                     <input
                       type="password"
                       placeholder="Re-enter your password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     />
 

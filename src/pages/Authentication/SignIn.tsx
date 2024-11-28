@@ -1,10 +1,75 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../../firebaseConfig"; // Import Firebase Auth
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import LogoDark from '../../images/logo/logo-dark.svg';
 import Logo from '../../images/logo/logo.svg';
+import "./signin.css"
 
 const SignIn: React.FC = () => {
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleAuthError = (errorCode: string): void => {
+    switch (errorCode) {
+      case "auth/invalid-email":
+        setError("Invalid email address.");
+        break;
+      case "auth/user-not-found":
+        setError("No user found with this email.");
+        break;
+      case "auth/wrong-password":
+        setError("Incorrect password.");
+        break;
+      case "auth/invalid-credential":
+        setError("Invalid credentials provided.");
+        break;
+      default:
+        setError("An unexpected error occurred. Please try again.");
+    }
+  };
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent form submission from reloading the page
+    setError(null); // Clear previous errors
+
+    if (!email || !validateEmail(email)) {
+      console.log("Please enter a valid email address.");
+      return;
+    }
+  
+    if (!password) {
+      console.log("Password is required.");
+      return;
+    }
+
+    if (typeof email !== "string" || typeof password !== "string") {
+      throw new Error("Invalid email or password format.");
+    }
+
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in 
+        const user = userCredential.user;
+        console.log(user)
+        navigate("/"); // Redirect to a protected route after successful sign-in
+      })
+      .catch((error) => {
+        console.log(error.code)
+        console.log(error.message)
+        handleAuthError(error.code);
+      });
+
+  };
+
   return (
     <>
       <Breadcrumb pageName="Sign In" />
@@ -152,10 +217,11 @@ const SignIn: React.FC = () => {
             <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
               <span className="mb-1.5 block font-medium">Start for free</span>
               <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-                Sign In to TailAdmin
+                Sign In
               </h2>
 
-              <form>
+              <form onSubmit={handleSignIn}>
+                {error && <p className="error-text">{error}</p>}
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
                     Email
@@ -164,6 +230,8 @@ const SignIn: React.FC = () => {
                     <input
                       type="email"
                       placeholder="Enter your email"
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     />
 
@@ -189,12 +257,14 @@ const SignIn: React.FC = () => {
 
                 <div className="mb-6">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
-                    Re-type Password
+                    Password
                   </label>
                   <div className="relative">
                     <input
                       type="password"
-                      placeholder="6+ Characters, 1 Capital letter"
+                      placeholder="Enter your password here"
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     />
 
@@ -223,11 +293,10 @@ const SignIn: React.FC = () => {
                 </div>
 
                 <div className="mb-5">
-                  <input
+                  <button
                     type="submit"
-                    value="Sign In"
                     className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
-                  />
+                  >Sign In</button>
                 </div>
 
                 <button className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50">

@@ -1,193 +1,164 @@
-/* SignUp.css */
-
-/* Container styling */
-.signup-container {
-    border: 1px solid var(--stroke);
-    background-color: var(--white);
-    box-shadow: var(--default-shadow);
-    border-radius: var(--radius-sm);
-  }
-  
-  .signup-container.dark {
-    border-color: var(--strokedark);
-    background-color: var(--boxdark);
-  }
-  
-  /* Flexbox for layout */
-  .signup-flex {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  
-  .signup-left {
-    display: none;
+/* Form container */
+.signup-form-container {
     width: 100%;
+    border: 1px solid var(--stroke-color);
   }
   
-  .signup-left-xl {
-    display: block;
-    width: 50%;
+  @media (prefers-color-scheme: dark) {
+    .signup-form-container {
+      border-color: var(--stroke-dark-color);
+    }
   }
   
-  .signup-left-content {
-    padding: 17.5rem 26rem;
-    text-align: center;
+  @media (min-width: 1280px) {
+    .signup-form-container {
+      width: 50%;
+      border-left: 2px solid var(--stroke-color);
+    }
+  
+    .signup-form-container.dark {
+      border-left-color: var(--stroke-dark-color);
+    }
   }
   
-  .signup-logo {
-    margin-bottom: 5.5rem;
-    display: inline-block;
-  }
-  
-  .signup-paragraph {
-    padding: 0 20rem;
-  }
-  
-  .signup-svg {
-    margin-top: 15rem;
-    display: inline-block;
-  }
-  
-  /* Right form styling */
-  .signup-right {
+  /* Form content */
+  .signup-form-content {
     width: 100%;
-    border-top: 1px solid var(--stroke);
+    padding: 1rem;
   }
   
-  .signup-right-xl {
-    width: 50%;
-    border-left: 2px solid var(--stroke);
+  @media (min-width: 640px) {
+    .signup-form-content {
+      padding: 3.125rem;
+    }
   }
   
-  .signup-right-content {
-    padding: 4rem;
+  @media (min-width: 1280px) {
+    .signup-form-content {
+      padding: 4.375rem;
+    }
   }
   
-  .signup-right-content-sm {
-    padding: 12.5rem;
-  }
-  
-  .signup-right-content-xl {
-    padding: 17.5rem;
-  }
-  
-  /* Text styling */
-  .signup-title {
-    margin-bottom: 1.5rem;
-    font-weight: 500;
-  }
-  
-  .signup-header {
-    margin-bottom: 9rem;
-    font-size: 2rem;
+  /* Form heading */
+  .signup-form-title {
+    margin-bottom: 2.25rem;
+    font-size: 1.5rem;
     font-weight: bold;
-    color: var(--black);
+    color: var(--black-color);
   }
   
-  .signup-header.dark {
-    color: var(--white);
-  }
-  
-  .signup-form-group {
-    margin-bottom: 4rem;
-  }
-  
-  .signup-label {
-    margin-bottom: 2.5rem;
+  .signup-form-subtitle {
+    margin-bottom: 0.375rem;
     display: block;
     font-weight: 500;
-    color: var(--black);
+    color: var(--black-color);
   }
   
-  .signup-label.dark {
-    color: var(--white);
+  @media (prefers-color-scheme: dark) {
+    .signup-form-title,
+    .signup-form-subtitle {
+      color: var(--white-color);
+    }
   }
   
-  /* Input field */
+  /* Form input */
   .signup-input-container {
+    margin-bottom: 1rem;
     position: relative;
   }
   
   .signup-input {
     width: 100%;
-    padding: 4rem 6rem;
-    border: 1px solid var(--stroke);
+    border-radius: 0.5rem;
+    border: 1px solid var(--stroke-color);
     background-color: transparent;
-    color: var(--black);
-    border-radius: var(--radius-lg);
+    padding: 1rem 2.5rem 1rem 1.5rem;
+    color: var(--black-color);
     outline: none;
   }
   
   .signup-input:focus {
-    border-color: var(--primary);
+    border-color: var(--primary-color);
     box-shadow: none;
   }
   
-  .signup-input.dark {
-    border-color: var(--form-strokedark);
-    background-color: var(--form-input);
-    color: var(--white);
+  @media (prefers-color-scheme: dark) {
+    .signup-input {
+      border-color: var(--form-stroke-dark-color);
+      background-color: var(--form-input-dark-color);
+      color: var(--white-color);
+    }
+  
+    .signup-input:focus {
+      border-color: var(--primary-color);
+    }
   }
   
-  .signup-input.dark:focus {
-    border-color: var(--primary);
-  }
-  
-  .signup-icon {
+  /* Input icon */
+  .signup-input-icon {
     position: absolute;
-    top: 4rem;
-    right: 4rem;
-    fill: currentColor;
-    opacity: 0.5;
+    top: 1rem;
+    right: 1rem;
   }
   
-  /* Buttons */
-  .signup-button {
+  /* Error message */
+  .error-message {
+    color: var(--error-color);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Form button */
+  .signup-submit {
     width: 100%;
-    padding: 4rem;
-    border-radius: var(--radius-lg);
-    font-weight: bold;
-    text-align: center;
     cursor: pointer;
-    background-color: var(--primary);
-    color: var(--white);
-    border: 1px solid var(--primary);
+    border-radius: 0.5rem;
+    border: 1px solid var(--primary-color);
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    padding: 1rem;
+    transition: background-color 0.3s;
   }
   
-  .signup-button:hover {
-    background-color: var(--primary-dark);
+  .signup-submit:hover {
+    background-color: var(--primary-hover-color);
   }
   
-  .signup-google-button {
+  .signup-google {
     display: flex;
-    justify-content: center;
+    width: 100%;
     align-items: center;
-    gap: 3.5rem;
-    border: 1px solid var(--stroke);
-    background-color: var(--gray);
-    padding: 4rem;
+    justify-content: center;
+    gap: 0.875rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--stroke-color);
+    background-color: var(--gray-color);
+    padding: 1rem;
+    transition: background-color 0.3s;
   }
   
-  .signup-google-button:hover {
-    background-color: var(--gray-dark);
+  .signup-google:hover {
+    background-color: var(--gray-hover-color);
   }
   
-  .signup-google-button.dark {
-    border-color: var(--strokedark);
-    background-color: var(--meta-4);
+  @media (prefers-color-scheme: dark) {
+    .signup-google {
+      border-color: var(--stroke-dark-color);
+      background-color: var(--meta-4-color);
+    }
+  
+    .signup-google:hover {
+      background-color: var(--meta-4-hover-color);
+    }
   }
   
-  .signup-google-button.dark:hover {
-    background-color: var(--meta-4-dark);
+  /* Form footer */
+  .signup-footer {
+    margin-top: 1.5rem;
+    text-align: center;
   }
   
-  .signup-link {
-    color: var(--primary);
-    text-decoration: none;
-  }
-  
-  .signup-link:hover {
-    text-decoration: underline;
+  .signup-footer-link {
+    color: var(--primary-color);
   }
   

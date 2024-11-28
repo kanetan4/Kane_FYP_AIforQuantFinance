@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "../../../firebaseConfig";
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "../../../firebaseConfig";
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import LogoDark from '../../images/logo/logo-dark.svg';
 import Logo from '../../images/logo/logo.svg';
@@ -21,7 +21,7 @@ const SignUp: React.FC = () => {
     return emailRegex.test(email);
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleNormalSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -69,6 +69,33 @@ const SignUp: React.FC = () => {
     }
   };
 
+
+  const handleGoogleSignUp = async () => {
+    try {
+      setLoading(true);
+      const result = await signInWithPopup(auth, googleProvider);
+      console.log("User signed up with Google:", result.user);
+      setLoading(false);
+
+      // Navigate to another page after successful sign-up
+      navigate("/"); // Update route as necessary
+    } catch (error: any) {
+      console.error("Google sign-up error:", error);
+      setError(error.message);
+      setLoading(false);
+    }
+  };
+
+  // const handleSignUp = (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+
+  //   const buttonClicked = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
+  //   if (buttonClicked.value === "normalSignUp") {
+  //     handleNormalSignUp();
+  //   } else if (buttonClicked.value === "googleSignUp") {
+  //     handleGoogleSignUp();
+  //   }
+  // };
 
   return (
     <>
@@ -219,7 +246,7 @@ const SignUp: React.FC = () => {
                 Sign Up
               </h2>
 
-              <form onSubmit={handleSignUp}>
+              <form onSubmit={handleNormalSignUp}>
                 {error && <p className="error-message">{error}</p>}
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
@@ -370,14 +397,12 @@ const SignUp: React.FC = () => {
                 </div>
 
                 <div className="mb-5">
-                  <input
-                    type="submit"
-                    value="Create account"
-                    className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
-                  />
+                  <button type="submit" value="emailSignUp" className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90">
+                    Signup with Email
+                  </button>
                 </div>
 
-                <button className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50">
+                <button type="button" onClick={handleGoogleSignUp} value="googleSignUp" className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50">
                   <span>
                     <svg
                       width="20"

@@ -11,12 +11,9 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import Profile from './pages/Profile/Profile';
 import Settings from './pages/Settings';
 import DefaultLayout from './layout/DefaultLayout';
-import { AuthContext } from "./context/AuthContext";
-import { UserType } from "./types";
 import { AuthProvider } from './provider/AuthProvider';
 
 function App() {
-  const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const { pathname } = useLocation();
 

@@ -1,3 +1,116 @@
+/* General form styling */
+.investment-form {
+  width: 100%;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 1.2rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.form-textarea {
+  resize: vertical;
+}
+
+.form-submit-button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #007bff;
+  border:1px black solid;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.form-submit-button:hover {
+  background-color: #0056b3;
+}
+
+
+/* Dashboard grid wrapper */
+.dashboard-grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+}
+
+.response-output {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.response-output h3 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+}
+
+.response-list {
+  margin: 0;
+  padding: 0;
+  list-style: none; /* Remove default bullet or numbering */
+}
+
+.response-list li {
+  margin-bottom: 10px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #555;
+}
+
+.response-list li span {
+  display: inline-block;
+}
+
+
 /* Grid styling */
 .dashboard-grid {
     display: grid;

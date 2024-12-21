@@ -1,28 +1,26 @@
 {
   "compilerOptions": {
-    // "target": "ESNext",
-    "lib": ["DOM", "DOM.Iterable", "ESNext", "dom", "es2015"],
-    "module": "ESNext",
-    "skipLibCheck": true,
+    "target": "ESNext",                      // Modern JavaScript target.
+    "lib": ["DOM", "DOM.Iterable", "ESNext"], // Ensure compatibility with browser and modern features.
+    "module": "ESNext",                      // Use ES module syntax for modern JavaScript.
+    "moduleResolution": "Node",             // Resolve modules in a Node.js environment.
+    "skipLibCheck": true,                   // Speeds up compilation by skipping library type checks.
+    "resolveJsonModule": true,              // Allow importing JSON files as modules.
+    "isolatedModules": true,                // Ensures each file is treated as a separate module.
+    "jsx": "react-jsx",                     // Enable React JSX transformation.
 
-    /* Bundler mode */
-    // "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
+    /* Linting and Safety */
+    "strict": true,                         // Enable strict type-checking options.
+    "noUnusedLocals": true,                 // Report unused local variables.
+    "noUnusedParameters": true,             // Report unused function parameters.
+    "noFallthroughCasesInSwitch": true,     // Ensure all switch cases are handled.
 
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-
-    "target": "ES6",
-    "moduleResolution": "Node",
-    "esModuleInterop": true,
+    /* Interop and ES Module Support */
+    "esModuleInterop": true,                // Ensures compatibility with CommonJS modules.
+    "allowSyntheticDefaultImports": true,   // Enable default imports for CommonJS modules.
   },
-  "include": ["src", "src/lib.d.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src"],                        // Specify included files for compilation.
+  "references": [
+    { "path": "./tsconfig.node.json" }      // Ensure this file exists if references are used.
+  ]
 }

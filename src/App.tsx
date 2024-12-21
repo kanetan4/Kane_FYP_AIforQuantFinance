@@ -6,6 +6,7 @@ import PageTitle from './components/PageTitle';
 import SignIn from './pages/Authentication/SignIn';
 import SignUp from './pages/Authentication/SignUp';
 import Analysis from './pages/Analysis/Analysis';
+import Alerts from './pages/Alerts/Alerts';
 import Chart from './pages/Chart';
 import Dashboard from './pages/Dashboard/Dashboard';
 import Profile from './pages/Profile/Profile';
@@ -43,6 +44,15 @@ function App() {
             }
           />
           <Route
+            path="/alerts"
+            element={
+              <>
+                <PageTitle title="Alerts" />
+                <Alerts />
+              </>
+            }
+          />
+          <Route
             path="/analysis"
             element={
               <>
@@ -55,7 +65,7 @@ function App() {
             path="/profile"
             element={
               <>
-                <PageTitle title="Profile | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <PageTitle title="Profile" />
                 <Profile />
               </>
             }
@@ -64,7 +74,7 @@ function App() {
             path="/settings"
             element={
               <>
-                <PageTitle title="Settings | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <PageTitle title="Settings" />
                 <Settings />
               </>
             }

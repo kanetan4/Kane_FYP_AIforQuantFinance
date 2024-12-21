@@ -1,4 +1,7 @@
+# Instructions to run the application
 
+Frontend Server: <code>npm run dev</code>
+Backend Server: <code>npx tsx src/api/server.ts</code>
 
 ## TailAdmin React - Installation
 
@@ -18,3 +21,4 @@ Run : <code>npm run build</code>
 Default build output directory: /dist
 
 This command will generate a dist as build folder in the root of your template that you can upload to your server.
+

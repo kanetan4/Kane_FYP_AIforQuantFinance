@@ -3,7 +3,7 @@ import cors from "cors";
 import { fetchFinancialNews } from "./webscraping";
 
 const app = express();
-const PORT = 5000;
+const PORT = 5001;
 
 // Enable CORS for frontend requests
 app.use(cors({

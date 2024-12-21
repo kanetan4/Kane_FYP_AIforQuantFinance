@@ -11,7 +11,7 @@ const Alerts = () => {
   const fetchFinancialNews = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/news");
+      const response = await fetch("http://localhost:5001/api/news");
       if (!response.ok) {
         throw new Error("Failed to fetch financial news.");
       }
@@ -39,7 +39,7 @@ const Alerts = () => {
   const fetchNews = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/api/news");
+      const response = await fetch("http://localhost:5001/api/news");
       if (!response.ok) {
         throw new Error("Failed to fetch news");
       }

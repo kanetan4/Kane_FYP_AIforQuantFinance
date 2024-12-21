@@ -1,9 +1,9 @@
 import axios from "axios";
-import cheerio from "cheerio";
+import * as cheerio from "cheerio";
 
 export const fetchFinancialNews = async (): Promise<any[]> => {
-//   const targetUrl = "https://www.cnn.com/business"; // Example: CNN Business
-  const targetUrl = "https://www.google.com"; // Example: CNN Business
+  const targetUrl = "https://www.cnn.com/business"; // Example: CNN Business
+//   const targetUrl = "https://www.google.com"; // Example: CNN Business
 
   try {
     // Fetch the website content using Axios

@@ -1,6 +1,20 @@
 import React, { useState } from "react";
 import './dashboard.css';
+import { Line } from "react-chartjs-2";
 import { callOpenAI } from "../../api/openai";
+import { backtestPortfolio } from "../../api/backtest";
+import {
+  Chart as ChartJS,
+  LineElement,
+  PointElement,
+  LinearScale,
+  Title,
+  CategoryScale,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Title);
 
 const Dashboard: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -9,8 +23,13 @@ const Dashboard: React.FC = () => {
     financialGoals: "",
     startingCapital: "",
   });
-
+  const [portfolioName, setPortfolioName] = useState<string | null>(null);
+  const [portfolioPoints, setPortfolioPoints] = useState<any[]>([]);
+  const [portfolioData, setPortfolioData] = useState<any[]>([]);
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
+  const [portfolio, setPortfolio] = useState<{ ticker: string; weight: number }[] | null>(null);
+  const [performanceData, setPerformanceData] = useState<any[]>([]); // For graph data
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -22,17 +41,14 @@ const Dashboard: React.FC = () => {
 
     // const userInput = `Please provide a concrete investment plan in 5 point form with 2 subpointers each and less than 250 words along with a concrete plan, do not use headers so there wont be stars in the text. I am a user looking to invest. My risk tolerance is ${formData.riskTolerance}, my investment horizon is ${formData.investmentHorizon} years, my financial goals are "${formData.financialGoals}", and I have a starting capital of $${formData.startingCapital}.`;
     const userInput = `Using principles of Modern Portfolio Theory (MPT), create a realistic and well-diversified investment portfolio tailored to my preferences. The portfolio should focus on maximizing returns for a given level of risk tolerance while considering asset classes such as equities, bonds, real estate, and alternative investments. 
-      Please provide a concrete investment plan in with the name of the portfolio, followed by 5 points with 2 subpoints each, all within 250 words. Ensure the portfolio allocations are grounded in practical, real-world examples and historical performance. 
+      Please ensure the portfolio is in this exact format:
+      1. A portfolio name.
+      2. 5 key portfolio points including allocation percentages, each with 2 subpoints exactly only (e.g., allocation percentages, real-world examples, or rebalancing strategies).
       Details about me:
       - Risk tolerance: ${formData.riskTolerance}.
       - Investment horizon: ${formData.investmentHorizon} years.
       - Financial goals: "${formData.financialGoals}".
-      - Starting capital: $${formData.startingCapital}.
-      Ensure that the investment recommendations include:
-      1. Specific asset classes and their recommended allocation percentages.
-      2. Examples of real-world ETFs, index funds, or securities for each allocation.
-      3. A brief explanation of how the portfolio aligns with my risk tolerance and goals.
-      4. Advice on rebalancing frequency and other strategies to optimize portfolio performance over time.`;
+      - Starting capital: $${formData.startingCapital}.`;
 
     const messages = [
       { role: "system", content: "You are a financial investment assistant." },
@@ -43,11 +59,56 @@ const Dashboard: React.FC = () => {
       const response = await callOpenAI(messages);
       const aiResponse = response.choices[0].message.content;
       console.log("OpenAI response:", aiResponse);
+      const parsedData = parseOpenAIResponse(aiResponse);
+      setPortfolioName(parsedData.portfolioName);
+      setPortfolioPoints(parsedData.portfolioPoints);
+      setPortfolioData(parsedData.portfolioData);
+
       setResponseMessage(aiResponse); // Set the response message to display below the form
+      const portfolioData = [
+        { ticker: "SPY", weight: 0.6 }, // Example: 60% equities
+        { ticker: "AGG", weight: 0.3 }, // Example: 30% bonds
+        { ticker: "VNQ", weight: 0.1 }, // Example: 10% real estate
+      ];
+      setPortfolio(portfolioData);
+  
+      // Fetch historical performance for the portfolio
+      const performance = await backtestPortfolio(portfolioData);
+      setPerformanceData(performance);
+  
+      setLoading(false);
+
     } catch (error) {
       console.error("Error fetching OpenAI response:", error);
       setResponseMessage("There was an error fetching the response. Please try again.");
+      setLoading(false);
     }
+  };
+
+  const parseOpenAIResponse = (message: string): {
+    portfolioName: string;
+    portfolioData: { assetClass: string; weight: number }[];
+  } => {
+    const lines = message.split("\n").filter((line) => line.trim() !== ""); // Remove empty lines
+    let portfolioName = "";
+    const portfolioData: { assetClass: string; weight: number }[] = [];
+  
+    lines.forEach((line, index) => {
+      // Extract portfolio name (assume it's the first line)
+      if (index === 0) {
+        portfolioName = line.trim();
+      } else if (/^\d\./.test(line)) {
+        // Match asset class (e.g., "Equities: 50%")
+        const assetMatch = line.match(/^(\d\.\s*)([a-zA-Z\s]+):\s*(\d+)%/);
+        if (assetMatch) {
+          const assetClass = assetMatch[2].trim();
+          const weight = parseFloat(assetMatch[3]) / 100; // Convert percentage to decimal
+          portfolioData.push({ assetClass, weight });
+        }
+      }
+    });
+  
+    return { portfolioName, portfolioData };
   };
 
   const parseResponseMessage = (message: string): string[] => {
@@ -62,6 +123,21 @@ const Dashboard: React.FC = () => {
         return line.trim(); // Just trim other lines
       });
   };
+
+  const chartData = performanceData.length
+    ? {
+        labels: performanceData.map((item) => item.date), // X-axis labels (dates)
+        datasets: [
+          {
+            label: "Portfolio Performance",
+            data: performanceData.map((item) => item.value), // Y-axis data (portfolio value)
+            borderColor: "rgba(75,192,192,1)",
+            backgroundColor: "rgba(75,192,192,0.2)",
+          },
+        ],
+      }
+    : null;
+  
 
   return (
     <>
@@ -132,6 +208,76 @@ const Dashboard: React.FC = () => {
             Submit
           </button>
         </form>
+
+        {portfolioName && (
+          <div>
+            <h2>{portfolioName} test</h2>
+            <ul>
+              {portfolioPoints.map((point, index) => (
+                <li key={index}>
+                  <strong>{point.title}</strong>
+                  <ul>
+                    {point.subpoints.map((subpoint, idx) => (
+                      <li key={idx}>{subpoint}</li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {portfolioData.length > 0 && (
+          <div>
+            <h3>Portfolio Allocation</h3>
+            <Line
+              data={{
+                labels: portfolioData.map((item) => item.ticker),
+                datasets: [
+                  {
+                    label: "Allocation (%)",
+                    data: portfolioData.map((item) => item.weight * 100), // Convert back to percentage
+                    backgroundColor: "rgba(75,192,192,0.2)",
+                    borderColor: "rgba(75,192,192,1)",
+                  },
+                ],
+              }}
+              options={{ responsive: true }}
+            />
+          </div>
+        )}
+
+        {portfolio && (
+          <div className="portfolio-output">
+            <h3>Generated Portfolio</h3>
+            <ul>
+              {portfolio.map((asset, index) => (
+                <li key={index}>
+                  {asset.ticker} - {asset.weight * 100}%
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {chartData && (
+          <div className="chart-container">
+            <h3>Portfolio Performance</h3>
+            <Line
+              key={JSON.stringify(chartData)} // Use unique key to force re-render
+              data={chartData}
+              options={{
+                responsive: false,
+                maintainAspectRatio: true,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: "top",
+                  },
+                },
+              }}
+            />
+          </div>
+        )}
 
         {responseMessage && (
           <div className="response-output">

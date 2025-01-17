@@ -1,6 +1,6 @@
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import CoverOne from '../../images/cover/cover-01.png';
-import userSix from '../../images/user/user-06.png';
+import userSix from '../../images/user/blank.png';
 import { Link } from 'react-router-dom';
 import "./profile.css";
 
@@ -47,9 +47,9 @@ const Profile = () => {
               <input type="file" name="profile" id="profile" />
             </label>
           </div>
-          <h3>Danish Heilium</h3>
-          <p>Ui/Ux Designer</p>
-          <div className="profile-stats">
+          <h3>Kane Tan</h3>
+          <p>Software Engineer</p>
+          {/* <div className="profile-stats">
             <div>
               <span>259</span>
               <span className="text-sm">Posts</span>
@@ -62,7 +62,7 @@ const Profile = () => {
               <span>2K</span>
               <span className="text-sm">Following</span>
             </div>
-          </div>
+          </div> */}
           <div className="about-me">
             <h4>About Me</h4>
             <p>
@@ -70,7 +70,6 @@ const Profile = () => {
             </p>
           </div>
           <div className="follow-me">
-            <h4>Follow me on</h4>
             <div className="follow-me-icons">
               <Link to="#" aria-label="social-icon">
                 <svg width="22" height="22" xmlns="http://www.w3.org/2000/svg">

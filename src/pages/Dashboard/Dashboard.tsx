@@ -20,7 +20,19 @@ const Dashboard: React.FC = () => {
   const handleOpenAIRequest = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const userInput = `Please provide a concrete investment plan in 5 point form with 2 subpointers each and less than 250 words along with a concrete plan, do not use headers so there wont be stars in the text. I am a user looking to invest. My risk tolerance is ${formData.riskTolerance}, my investment horizon is ${formData.investmentHorizon} years, my financial goals are "${formData.financialGoals}", and I have a starting capital of $${formData.startingCapital}.`;
+    // const userInput = `Please provide a concrete investment plan in 5 point form with 2 subpointers each and less than 250 words along with a concrete plan, do not use headers so there wont be stars in the text. I am a user looking to invest. My risk tolerance is ${formData.riskTolerance}, my investment horizon is ${formData.investmentHorizon} years, my financial goals are "${formData.financialGoals}", and I have a starting capital of $${formData.startingCapital}.`;
+    const userInput = `Using principles of Modern Portfolio Theory (MPT), create a realistic and well-diversified investment portfolio tailored to my preferences. The portfolio should focus on maximizing returns for a given level of risk tolerance while considering asset classes such as equities, bonds, real estate, and alternative investments. 
+      Please provide a concrete investment plan in with the name of the portfolio, followed by 5 points with 2 subpoints each, all within 250 words. Ensure the portfolio allocations are grounded in practical, real-world examples and historical performance. 
+      Details about me:
+      - Risk tolerance: ${formData.riskTolerance}.
+      - Investment horizon: ${formData.investmentHorizon} years.
+      - Financial goals: "${formData.financialGoals}".
+      - Starting capital: $${formData.startingCapital}.
+      Ensure that the investment recommendations include:
+      1. Specific asset classes and their recommended allocation percentages.
+      2. Examples of real-world ETFs, index funds, or securities for each allocation.
+      3. A brief explanation of how the portfolio aligns with my risk tolerance and goals.
+      4. Advice on rebalancing frequency and other strategies to optimize portfolio performance over time.`;
 
     const messages = [
       { role: "system", content: "You are a financial investment assistant." },

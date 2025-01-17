@@ -25,7 +25,6 @@ const Alerts = () => {
   };
 
   const handleFetchRecommendations = () => {
-    // Simulated recommendations for now
     setLoading(true);
     setTimeout(() => {
       setRecommendations([
@@ -36,22 +35,6 @@ const Alerts = () => {
     }, 2000);
   };
 
-  const fetchNews = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("http://localhost:5001/api/news");
-      if (!response.ok) {
-        throw new Error("Failed to fetch news");
-      }
-      const data = await response.json();
-      setAlerts(data);
-    } catch (error) {
-      console.error("Error fetching news:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <>
       <Breadcrumb pageName="Alerts" />
@@ -59,17 +42,13 @@ const Alerts = () => {
       <div className="alerts-container">
         <h1 className="alerts-title">Financial Alerts</h1>
 
-        {/* Fetch News Button */}
         <section className="alerts-section">
-          <h2 className="section-title">Real-Time Alerts</h2>
           <button className="fetch-button" onClick={fetchFinancialNews} disabled={loading}>
             {loading ? "Fetching Alerts..." : "Fetch Financial Alerts"}
           </button>
 
-          {/* Display Loading or Error */}
           {loading ? "Fetching News..." : "Fetch News"}
 
-          {/* Display Alerts */}
           {!loading && alerts.length > 0 && (
             <ul className="alerts-list">
               {alerts.map((alert, index) => (
@@ -92,9 +71,8 @@ const Alerts = () => {
           )}
         </section>
 
-        {/* Recommendations Section */}
         <section className="recommendations-section">
-          <h2 className="section-title">AI-Driven Recommendations</h2>
+          <h2 className="section-title">Personalised Recommendations</h2>
           <button className="fetch-button" onClick={handleFetchRecommendations} disabled={loading}>
             {loading ? "Fetching Recommendations..." : "Get Recommendations"}
           </button>

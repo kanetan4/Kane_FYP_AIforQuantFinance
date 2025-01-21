@@ -110,6 +110,38 @@
   display: inline-block;
 }
 
+.portfolio-output {
+  margin: 20px 0;
+}
+
+.portfolio-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.portfolio-item {
+  margin-bottom: 15px;
+}
+
+.portfolio-title {
+  font-size: 1.25rem; /* Higher font size for titles */
+  font-weight: bold;  /* Bold titles */
+  margin-bottom: 5px;
+  color: #333;        /* Optional: Adjust color */
+}
+
+.portfolio-subpoints {
+  list-style-type: disc; /* Bullets for subpoints */
+  margin-left: 20px;
+  padding-left: 0;
+}
+
+.portfolio-subpoint {
+  font-size: 1rem; /* Normal size for subpoints */
+  color: #555;     /* Optional: Adjust color */
+}
+
+
 
 /* Grid styling */
 .dashboard-grid {

@@ -38,9 +38,9 @@ const Dashboard: React.FC = () => {
 
     const userInput = `Using principles of Modern Portfolio Theory (MPT), create a realistic and well-diversified investment portfolio tailored to my preferences. The portfolio should focus on maximizing returns for a given level of risk tolerance while considering asset classes such as equities, bonds, real estate, and alternative investments. 
       Please ensure the portfolio is in this exact format:
-      1. A portfolio name.
-      2. 5 key portfolio points including allocation percentages in this exact format (eg. Equities - 50%) from this list of invesmtnets ("Equities - US Large Cap, Equities - US Small Cap, Equities - International, Equities - Emerging Markets, Bonds - Aggregate, Bonds - Treasuries, Real Estate, Commodities - Gold, Commodities - Oil, Cryptocurrency - Bitcoin, Cash"), each with 2 subpoints exactly only (e.g., allocation percentages, real-world examples, or rebalancing strategies).
-      3. Summary point which starts with the word "Summary".
+      - A portfolio name.
+      - 5 key portfolio points including allocation percentages in this exact format numbered 1-5 (eg. Equities - 50%) from this list of invesmtnets ("Equities - US Large Cap, Equities - US Small Cap, Equities - International, Equities - Emerging Markets, Bonds - Aggregate, Bonds - Treasuries, Real Estate, Commodities - Gold, Commodities - Oil, Cryptocurrency - Bitcoin, Cash"), each with 2 subpoints exactly only (e.g., allocation percentages, real-world examples, or rebalancing strategies).
+      - Summary point which starts with the word "Summary".
       Details about me:
       - Risk tolerance: ${formData.riskTolerance}.
       - Investment horizon: ${formData.investmentHorizon} years.
@@ -95,7 +95,7 @@ const Dashboard: React.FC = () => {
   
     lines.forEach((line, index) => {
       // Extract portfolio name (assume it's the first line)
-      line = line.replace(/\*/g, "").trim();
+      line = line.replace(/[*#]/g, "").trim();
 
       if (index === 0) {
         portfolioName = line.trim();
@@ -214,8 +214,8 @@ const Dashboard: React.FC = () => {
             Submit
           </button>
         </form>
-        
-        { portfolioData && (
+
+        {portfolioData && (
           <div className="portfolio-output">
             <ul>
               {portfolioData.map((asset, index) => (

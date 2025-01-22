@@ -3,6 +3,8 @@ import axios from "axios";
 export const backtestPortfolio = async (portfolio: { ticker: string; weight: number }[]) => {
   const historicalData: Record<string, any[]> = {};
 
+  const apiKey = import.meta.env.ALPHAVANTAGE_API_KEY;
+
   for (const asset of portfolio) {
     const response = await axios.get(
       `https://www.alphavantage.co/query`, 
@@ -10,7 +12,7 @@ export const backtestPortfolio = async (portfolio: { ticker: string; weight: num
         params: {
           function: "TIME_SERIES_MONTHLY",
           symbol: asset.ticker,
-          apikey: "G2YDMSEM518VT8TQ"
+          apikey: apiKey
         }
       }
     );

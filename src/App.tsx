@@ -31,8 +31,8 @@ function App() {
   return loading ? (
     <Loader />
   ) : (
-    <DefaultLayout>
-      <AuthProvider>
+    <AuthProvider>
+      <DefaultLayout>
         <Routes>
           <Route
             index
@@ -107,8 +107,8 @@ function App() {
             }
           />
         </Routes>
-      </AuthProvider>
-    </DefaultLayout>
+      </DefaultLayout>
+    </AuthProvider>
   );
 }
 

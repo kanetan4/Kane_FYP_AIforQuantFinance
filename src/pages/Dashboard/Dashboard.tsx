@@ -13,6 +13,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { useAuth } from "../../context/AuthContext"
 
 ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Title);
 
@@ -27,6 +28,7 @@ const Dashboard: React.FC = () => {
   const [portfolioPoints, setPortfolioPoints] = useState<any[]>([]);
   const [portfolioData, setPortfolioData] = useState<any[]>([]);
   const [performanceData, setPerformanceData] = useState<any[]>([]); // For graph data
+  const { user, userData, loading, logout } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -148,6 +150,9 @@ const Dashboard: React.FC = () => {
   return (
     <>
       <div>
+        <div>
+          {userData ? (<><h1>Welcome, {userData.name}!</h1></>) : (<p>No user data found.</p>)}
+        </div>
         <form onSubmit={handleOpenAIRequest} className="investment-form">
           <h2 className="form-title">Investment Preferences</h2>
           

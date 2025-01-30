@@ -1,5 +1,22 @@
+import  { createContext, useContext } from "react";
+import { User } from "firebase/auth";
 
-import React from "react";
-import firebase from "firebase/app";
+// Define context type
+interface AuthContextType {
+  user: User | null;
+  userData: any | null;
+  loading: boolean;
+  logout: () => Promise<void>;
+}
 
-export const AuthContext = React.createContext<firebase.User | null>(null);
+// Create Context
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Custom hook for accessing the AuthContext
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};

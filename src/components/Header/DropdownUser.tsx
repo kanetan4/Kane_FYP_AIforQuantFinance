@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ClickOutside from '../ClickOutside';
 import UserOne from '../../images/user/blank.png';
+import { useAuth } from "../../context/AuthContext"
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { user, userData, loading, logout } = useAuth();
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -15,9 +17,8 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            Kane Tan
+            <div>{userData ? (<><h1>Welcome, {userData.name}!</h1></>) : (<p>User</p>)}</div>
           </span>
-          {/* <span className="block text-xs">UX Designer</span> */}
         </span>
 
         <span className="h-12 w-12 rounded-full">
@@ -137,7 +138,7 @@ const DropdownUser = () => {
                 fill=""
               />
             </svg>
-            Log Out
+            <button onClick={logout}>Logout</button>
           </button>
         </div>
       )}

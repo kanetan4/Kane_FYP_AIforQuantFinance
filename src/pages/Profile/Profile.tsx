@@ -3,8 +3,11 @@ import CoverOne from '../../images/cover/cover-01.png';
 import userSix from '../../images/user/blank.png';
 import { Link } from 'react-router-dom';
 import "./profile.css";
+import { useAuth } from "../../context/AuthContext"
 
 const Profile = () => {
+  const { user, userData, loading, logout } = useAuth();
+
   return (
     <>
       <Breadcrumb pageName="Profile" />
@@ -47,7 +50,7 @@ const Profile = () => {
               <input type="file" name="profile" id="profile" />
             </label>
           </div>
-          <h3>Kane Tan</h3>
+          <h3><div>{userData ? (<><h1>Welcome, {userData.name}!</h1></>) : (<p>No user data found.</p>)}</div></h3>
           <p>Software Engineer</p>
           {/* <div className="profile-stats">
             <div>

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword, updateProfile, signInWithPopup } from "firebase/auth";
-import { auth, googleProvider } from "../../../firebaseConfig";
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, User } from "firebase/auth";
+import { auth, googleProvider, db } from "../../../firebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import LogoDark from '../../images/logo/logo-dark.svg';
 import Logo from '../../images/logo/logo.svg';
@@ -12,6 +13,7 @@ const SignUp: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [name, setName] = useState<string>("");
+  const [telegramhandle, setTelegramHandle] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -47,12 +49,19 @@ const SignUp: React.FC = () => {
 
     try {
       setLoading(true);
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      const userCredential = await createUserWithEmailAndPassword( auth, email, password );
       const user = userCredential.user;
+
+      if (user) {
+        // Save user data in Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          email: user.email,
+          name: name,
+          teleHandle: telegramhandle,
+        });
+        console.log("User successfully created and added to Firestore");
+      }
 
       // Update user's display name
       await updateProfile(user, { displayName: name });
@@ -382,6 +391,22 @@ const SignUp: React.FC = () => {
                         </g>
                       </svg>
                     </span>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <label className="mb-2.5 block font-medium text-black dark:text-white">
+                    Telegram Handle
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="telegram-handle"
+                      placeholder="Enter your Telegram Handle"
+                      value={telegramhandle}
+                      onChange={(e) => setTelegramHandle(e.target.value)}
+                      required
+                      className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    />
                   </div>
                 </div>
 

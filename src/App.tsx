@@ -13,12 +13,11 @@ import Profile from './pages/Profile/Profile';
 import Settings from './pages/Settings';
 import DefaultLayout from './layout/DefaultLayout';
 import { AuthProvider } from './provider/AuthProvider';
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'; // Import the ProtectedRoute component
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const { pathname } = useLocation();
-
-  
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -34,65 +33,12 @@ function App() {
     <AuthProvider>
       <DefaultLayout>
         <Routes>
-          <Route
-            index
-            element={
-              <>
-                <PageTitle title="Portfolio" />
-                <Dashboard />
-              </>
-            }
-          />
-          <Route
-            path="/alerts"
-            element={
-              <>
-                <PageTitle title="Alerts" />
-                <Alerts />
-              </>
-            }
-          />
-          <Route
-            path="/analysis"
-            element={
-              <>
-                <PageTitle title="Analysis" />
-                <Analysis />
-              </>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <>
-                <PageTitle title="Profile" />
-                <Profile />
-              </>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <>
-                <PageTitle title="Settings" />
-                <Settings />
-              </>
-            }
-          />
-          <Route
-            path="/chart"
-            element={
-              <>
-                <PageTitle title="Basic Chart | TailAdmin - Tailwind CSS Admin Dashboard Template" />
-                <Chart />
-              </>
-            }
-          />
+          {/* Public Routes */}
           <Route
             path="/auth/signin"
             element={
               <>
-                <PageTitle title="Signin | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <PageTitle title="Signin" />
                 <SignIn />
               </>
             }
@@ -101,9 +47,77 @@ function App() {
             path="/auth/signup"
             element={
               <>
-                <PageTitle title="Signup | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                <PageTitle title="Signup" />
                 <SignUp />
               </>
+            }
+          />
+
+          {/* Protected Routes */}
+          <Route
+            index
+            element={
+              <ProtectedRoute>
+                <>
+                  <PageTitle title="Portfolio" />
+                  <Dashboard />
+                </>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/alerts"
+            element={
+              <ProtectedRoute>
+                <>
+                  <PageTitle title="Alerts" />
+                  <Alerts />
+                </>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analysis"
+            element={
+              <ProtectedRoute>
+                <>
+                  <PageTitle title="Analysis" />
+                  <Analysis />
+                </>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <>
+                  <PageTitle title="Profile" />
+                  <Profile />
+                </>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <>
+                  <PageTitle title="Settings" />
+                  <Settings />
+                </>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chart"
+            element={
+              <ProtectedRoute>
+                <>
+                  <PageTitle title="Basic Chart | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+                  <Chart />
+                </>
+              </ProtectedRoute>
             }
           />
         </Routes>

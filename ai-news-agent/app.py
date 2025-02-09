@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from news_scrapper import scrape_news, fetch_news_for_keywords
 from summarizer import summarize_news
@@ -9,8 +9,11 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend-backend communication
 
 @app.route('/api/getnews', methods=['GET'])
-def test2():
-    news_articles = fetch_news_for_keywords(['tech','finance'])
+def getnews():
+    data = request.get_json()
+    keywords = data.get('keywords', ['tech', 'finance'])
+    
+    news_articles = fetch_news_for_keywords(keywords)
     print(news_articles,"\n")
     summary = summarize_news(news_articles)
     return jsonify({'summary': summary})

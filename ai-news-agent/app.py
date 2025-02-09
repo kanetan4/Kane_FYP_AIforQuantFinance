@@ -1,15 +1,16 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from news_scrapper import scrape_news, fetch_news_for_keywords
+from news_scrapper import fetch_news_for_keywords
 from summarizer import summarize_news
-import os
-import requests
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend-backend communication
 
-@app.route('/api/getnews', methods=['GET'])
+@app.route('/api/getnews', methods=['POST'])
 def getnews():
+    if not request.is_json:
+        return jsonify({"error": "Invalid content type. Expected 'application/json'"}), 415
+
     data = request.get_json()
     keywords = data.get('keywords', ['tech', 'finance'])
     

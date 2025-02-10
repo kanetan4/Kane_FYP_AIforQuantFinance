@@ -241,7 +241,6 @@ const Dashboard: React.FC = () => {
             )}
             {chartData && (
               <div className="chart-container">
-                <h3>Portfolio Performance</h3>
                 <Line
                   key={JSON.stringify(chartData)} // Use unique key to force re-render
                   data={chartData}

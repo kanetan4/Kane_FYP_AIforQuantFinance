@@ -48,4 +48,41 @@
   }
   
 
-
+  .news-container {
+    max-width: 800px;
+    margin: 20px auto;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+  }
+  
+  .news-header {
+    font-size: 22px;
+    font-weight: bold;
+    color: #1a73e8; /* Google Blue */
+    margin-bottom: 20px;
+    border-left: 5px solid #1a73e8;
+    padding-left: 10px;
+  }
+  
+  .news-item {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .news-topic {
+    font-size: 18px;
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 5px;
+  }
+  
+  .news-article {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #555;
+    text-align: justify;
+  }
+  

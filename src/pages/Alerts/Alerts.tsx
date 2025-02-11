@@ -1,14 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Breadcrumb from "../../components/Breadcrumbs/Breadcrumb";
 import "./alerts.css";
-import { db } from "./firebaseConfig"; // Adjust the import path based on your setup
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { auth, db } from "../../../firebaseConfig";
+import { useAuth } from "../../context/AuthContext"
+import { collection, addDoc, serverTimestamp, doc, setDoc, query, orderBy, limit, getDocs } from "firebase/firestore";
 
 const Alerts = () => {
   const [alerts, setAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<string[] | null>(null);
+  const [news, setNews] = useState<{ header: string; articles: any[] } | null>(null);
 //   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchNewsFromFirestore = async () => {
+      setLoading(true);
+      try {
+        const newsRef = collection(db, "news");
+        const q = query(newsRef, orderBy("date", "desc"), limit(1)); // Get the latest news
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          const latestNews = querySnapshot.docs[0].data();
+          setNews(latestNews);
+        } else {
+          console.warn("No news found in Firestore.");
+          setNews(null);
+        }
+      } catch (error) {
+        console.error("Error fetching news:", error);
+      }
+      setLoading(false);
+    };
+
+    fetchNewsFromFirestore();
+  }, []);
+
+  if (loading) return <div>Loading latest news...</div>;
+  if (!news) return <div>No news available.</div>;
 
   const fetchFinancialNews = async () => {
     setLoading(true);
@@ -58,6 +87,35 @@ const Alerts = () => {
         article: rest.length > 0 ? rest.join(" ").trim() : topic.trim(),
       };
     });
+
+    const user = auth.currentUser;
+    if (!user) {
+      console.error("User not authenticated, unable to save news.");
+      return;
+    }
+
+    const formattedNews = {
+      date: new Date().toISOString().split("T")[0], // Store the date in YYYY-MM-DD format
+      header,
+      articles: formattedArticles,
+    };
+
+    const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
+
+    // News document to save
+    const newsData = {
+      date: today,
+      header: formattedNews.header,
+      articles: formattedNews.articles,
+    };
+
+    try {
+      setDoc(doc(db, "news", today), newsData);
+      console.log("News successfully saved to Firestore!");
+    } catch (error) {
+      console.error("Error saving news to Firestore:", error);
+    }
+
   
     return { header, articles: formattedArticles };
   };
@@ -83,20 +141,19 @@ const Alerts = () => {
       <Breadcrumb pageName="Alerts" />
 
       <div className="alerts-container">
-        <h1 className="alerts-title">Financial Alerts</h1>
 
         <section className="alerts-section">
           <button className="fetch-button" onClick={fetchFinancialNews} disabled={loading}>
-            {loading ? "Fetching Alerts..." : "Fetch Financial Alerts"}
+            Fetch Alerts
           </button>
 
-          {loading ? "Fetching News..." : "Fetch News"}
+          {/* {loading ? "Fetching News..." : "Fetch News"} */}
           
         </section>
 
         <div className="news-container">
-          <div className="news-header">{formattedAlerts.header}</div>
-          {formattedAlerts.articles.map((item, index) => (
+          <div className="news-header">{news.header}</div>
+          {news.articles.map((item, index) => (
             <div key={index} className="news-item">
               <div className="news-topic">
                 {index + 1}. {item.topic}

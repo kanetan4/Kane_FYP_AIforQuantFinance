@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import './dashboard.css';
 import { Line } from "react-chartjs-2";
 import { callOpenAI } from "../../api/openai";
@@ -14,6 +14,8 @@ import {
   Legend,
 } from "chart.js";
 import { useAuth } from "../../context/AuthContext"
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { auth, db } from "../../../firebaseConfig"; // Adjust path if necessary
 
 ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Title);
 
@@ -27,8 +29,38 @@ const Dashboard: React.FC = () => {
   const [portfolioName, setPortfolioName] = useState<string | null>(null);
   const [portfolioPoints, setPortfolioPoints] = useState<any[]>([]);
   const [portfolioData, setPortfolioData] = useState<any[]>([]);
-  const [performanceData, setPerformanceData] = useState<any[]>([]); // For graph data
+  const [performanceData, setPerformanceData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<any | null>(null);
   const { user, userData, loading, logout } = useAuth();
+
+  useEffect(() => {
+    if (!user) return; // Ensure user is logged in
+
+    const fetchPortfolio = async () => {
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          console.log(userData.portfolio);
+          setPortfolioName(userData.portfolio.name || "My Portfolio");
+          setPortfolioPoints(userData.portfolio.points || []);
+          setChartData(userData.portfolio.chart || null);
+        } else {
+          console.error("No portfolio data found for this user.");
+        }
+      } catch (error) {
+        console.error("Error fetching portfolio data:", error);
+      } finally {
+        console.log("final");
+      }
+    };
+
+    fetchPortfolio();
+  }, [user]);
+
+  if (loading) return <p>Loading portfolio...</p>;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -74,6 +106,45 @@ const Dashboard: React.FC = () => {
       console.error("Error fetching OpenAI response:", error);
     }
   };
+
+  const savePortfolioToFirestore = async (
+    portfolioName: string,
+    portfolioData: { ticker: string; weight: number }[],
+    portfolioPoints: { title: string; subpoints: string[] }[],
+    chartData: any
+  ) => {
+    const user = auth.currentUser; // Get the currently logged-in user
+  
+    if (!user) {
+      console.error("No authenticated user found.");
+      return;
+    }
+  
+    try {
+      // Reference to the user's document in Firestore
+      const userRef = doc(db, "users", user.uid);
+  
+      // Save portfolio data under the user's Firestore document
+      await setDoc(
+        userRef,
+        {
+          portfolio: {
+            name: portfolioName,
+            data: portfolioData,
+            points: portfolioPoints,
+            chart: chartData,
+            timestamp: new Date(), // Save timestamp for tracking
+          },
+        },
+        { merge: true } // Prevents overwriting existing user data
+      );
+  
+      console.log("Portfolio successfully saved to Firestore.");
+    } catch (error) {
+      console.error("Error saving portfolio to Firestore:", error);
+    }
+  };
+  
 
   const assetClassToTicker = {
     "Equities - US Large Cap": "SPY",
@@ -124,28 +195,30 @@ const Dashboard: React.FC = () => {
         portfolioPoints[portfolioPoints.length - 1].subpoints.push(line.trim());
       }
     });
+    
+    const chartData = performanceData.length
+      ? {
+          labels: performanceData.map((item) => item.date), // X-axis labels (dates)
+          datasets: [
+            {
+              label: "Portfolio Performance",
+              data: performanceData.map((item) => item.value), // Y-axis data (portfolio value)
+              borderColor: "rgba(75,192,192,1)",
+              backgroundColor: "rgba(75,192,192,0.2)",
+            },
+          ],
+        }
+      : null;
   
     console.log("Portfolio Name:", portfolioName);
     console.log("Portfolio Data:", portfolioData);
     console.log("Portfolio Points:", portfolioPoints);
+
+    savePortfolioToFirestore(portfolioName, portfolioData, portfolioPoints, chartData);
   
     return { portfolioName, portfolioData, portfolioPoints };
   };
 
-  const chartData = performanceData.length
-    ? {
-        labels: performanceData.map((item) => item.date), // X-axis labels (dates)
-        datasets: [
-          {
-            label: "Portfolio Performance",
-            data: performanceData.map((item) => item.value), // Y-axis data (portfolio value)
-            borderColor: "rgba(75,192,192,1)",
-            backgroundColor: "rgba(75,192,192,0.2)",
-          },
-        ],
-      }
-    : null;
-  
 
   return (
     <>
@@ -234,11 +307,7 @@ const Dashboard: React.FC = () => {
 
         {portfolioPoints && (
           <div className="response-output">
-            {portfolioName && (
-              <div>
-                <h3>{portfolioName}</h3>
-              </div>
-            )}
+            {portfolioName && ( <div> <h3>{portfolioName}</h3> </div> )}
             {chartData && (
               <div className="chart-container">
                 <Line

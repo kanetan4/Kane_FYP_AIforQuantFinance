@@ -10,6 +10,7 @@ import Alerts from './pages/Alerts/Alerts';
 import Chart from './pages/Chart';
 import Dashboard from './pages/Dashboard/Dashboard';
 import Profile from './pages/Profile/Profile';
+import Preferences from './pages/Preferences/Preferences'
 import Settings from './pages/Settings';
 import DefaultLayout from './layout/DefaultLayout';
 import { AuthProvider } from './provider/AuthProvider';
@@ -60,6 +61,17 @@ function App() {
               <ProtectedRoute>
                 <>
                   <PageTitle title="Portfolio" />
+                  <Preferences />
+                </>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/preferences"
+            element={
+              <ProtectedRoute>
+                <>
+                  <PageTitle title="Investment Preferences" />
                   <Dashboard />
                 </>
               </ProtectedRoute>

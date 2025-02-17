@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import './dashboard.css';
-import { Line } from "react-chartjs-2";
 import { callOpenAI } from "../../api/openai";
 import { backtestPortfolio } from "../../api/backtest";
 import {
@@ -13,9 +12,9 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { useAuth } from "../../context/AuthContext"
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../../firebaseConfig"; // Adjust path if necessary
+import Modal from "./Modal";
 
 ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend, Title);
 
@@ -26,41 +25,9 @@ const Dashboard: React.FC = () => {
     financialGoals: "",
     startingCapital: "",
   });
-  const [portfolioName, setPortfolioName] = useState<string | null>(null);
-  const [portfolioPoints, setPortfolioPoints] = useState<any[]>([]);
-  const [portfolioData, setPortfolioData] = useState<any[]>([]);
-  const [performanceData, setPerformanceData] = useState<any[]>([]);
-  const [chartData, setChartData] = useState<any | null>(null);
-  const { user, userData, loading, logout } = useAuth();
-
-  useEffect(() => {
-    if (!user) return; // Ensure user is logged in
-
-    const fetchPortfolio = async () => {
-      try {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          console.log(userData.portfolio);
-          setPortfolioName(userData.portfolio.name || "My Portfolio");
-          setPortfolioPoints(userData.portfolio.points || []);
-          setChartData(userData.portfolio.chart || null);
-        } else {
-          console.error("No portfolio data found for this user.");
-        }
-      } catch (error) {
-        console.error("Error fetching portfolio data:", error);
-      } finally {
-        console.log("final");
-      }
-    };
-
-    fetchPortfolio();
-  }, [user]);
-
-  if (loading) return <p>Loading portfolio...</p>;
+  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [generatedPortfolio, setGeneratedPortfolio] = useState<any | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -69,6 +36,7 @@ const Dashboard: React.FC = () => {
 
   const handleOpenAIRequest = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     const userInput = `Using principles of Modern Portfolio Theory (MPT), create a realistic and well-diversified investment portfolio tailored to my preferences. The portfolio should focus on maximizing returns for a given level of risk tolerance while considering asset classes such as equities, bonds, real estate, and alternative investments. 
       Please ensure the portfolio is in this exact format:
@@ -91,19 +59,39 @@ const Dashboard: React.FC = () => {
       const aiResponse = response.choices[0].message.content;
       console.log("OpenAI response:", aiResponse);
       const parsedData = parseOpenAIResponse(aiResponse);
-      setPortfolioName(parsedData.portfolioName);
-      setPortfolioPoints(parsedData.portfolioPoints);
-      setPortfolioData(parsedData.portfolioData);
-      console.log(portfolioData);
   
       // Fetch historical performance for the portfolio
-      const performance = await backtestPortfolio(portfolioData);
-      console.log("walao");
+      console.log("PORTFOLIO DATA HEREE  ",parsedData.portfolioData)
+      const performance = await retryBacktestPortfolio(parsedData.portfolioData);
       console.log("performance:",performance);
-      setPerformanceData(performance);
-  
+
+      const chartData = performance.length
+        ? {
+            labels: performance.map((item) => item.date), // X-axis labels (dates)
+            datasets: [
+              {
+                label: "Portfolio Performance",
+                data: performance.map((item) => item.value), // Y-axis data (portfolio value)
+                borderColor: "rgba(75,192,192,1)",
+                backgroundColor: "rgba(75,192,192,0.2)",
+              },
+            ],
+          }
+        : null;
+      
+      setGeneratedPortfolio({
+        portfolioName: parsedData.portfolioName,
+        portfolioData: parsedData.portfolioData,
+        portfolioPoints: parsedData.portfolioPoints,
+        chartData: chartData,
+      });
+
+      setShowModal(true);
+      // savePortfolioToFirestore(parsedData.portfolioName, parsedData.portfolioData, parsedData.portfolioPoints, chartData);
     } catch (error) {
       console.error("Error fetching OpenAI response:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -160,6 +148,28 @@ const Dashboard: React.FC = () => {
     "Cash": "BIL",
   };
 
+  const retryBacktestPortfolio = async (portfolio, maxRetries = 5) => {
+    let attempts = 0;
+    let performanceData = null;
+
+    while (attempts < maxRetries) {
+        try {
+            performanceData = await backtestPortfolio(portfolio);
+            if (performanceData && performanceData.length > 0) {
+                return performanceData; // Successful fetch
+            }
+        } catch (error) {
+            console.error(`Backtest failed (attempt ${attempts + 1}):`, error);
+        }
+
+        attempts++;
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retrying
+    }
+
+    throw new Error("Backtest failed after maximum retries.");
+  };
+
+
   const parseOpenAIResponse = (message: string) => {
     const lines = message.split("\n").filter((line) => line.trim() !== ""); // Split lines and remove empty ones
     let portfolioName = "";
@@ -167,65 +177,73 @@ const Dashboard: React.FC = () => {
     const portfolioData: { ticker: string; weight: number }[] = [];
   
     lines.forEach((line, index) => {
-      // Extract portfolio name (assume it's the first line)
       line = line.replace(/[*#]/g, "").trim();
 
       if (index === 0) {
         portfolioName = line.trim();
       } else if (/^\d\./.test(line) || line.includes("Summary")) {
-        // Match format "1. **Equities - US Large Cap - 40%**"
         const match = line.match(/^(\d\.\s*)([a-zA-Z\s\-]+)\s*-\s*(\d+)%$/);
         if (match) {
           const assetClass = match[2].trim(); // Extract asset class
           const weight = parseFloat(match[3]) / 100; // Convert percentage to decimal
   
-          // Map asset class to ticker
           const ticker = assetClassToTicker[assetClass];
           if (ticker) {
             portfolioData.push({ ticker, weight });
           } else {
             console.warn(`No ticker found for asset class: ${assetClass}`);
           }
-  
-          // Add the point to portfolioPoints
         }
         portfolioPoints.push({ title: line.trim(), subpoints: [] });
       } else {
-        // Extract subpoints (e.g., "- Allocate 60% to SPY")
         portfolioPoints[portfolioPoints.length - 1].subpoints.push(line.trim());
       }
     });
-    
-    const chartData = performanceData.length
-      ? {
-          labels: performanceData.map((item) => item.date), // X-axis labels (dates)
-          datasets: [
-            {
-              label: "Portfolio Performance",
-              data: performanceData.map((item) => item.value), // Y-axis data (portfolio value)
-              borderColor: "rgba(75,192,192,1)",
-              backgroundColor: "rgba(75,192,192,0.2)",
-            },
-          ],
-        }
-      : null;
   
     console.log("Portfolio Name:", portfolioName);
     console.log("Portfolio Data:", portfolioData);
     console.log("Portfolio Points:", portfolioPoints);
-
-    savePortfolioToFirestore(portfolioName, portfolioData, portfolioPoints, chartData);
   
     return { portfolioName, portfolioData, portfolioPoints };
   };
 
+  const rejectPortfolio = () => {
+    setShowModal(false);
+    setGeneratedPortfolio(null);
+    setFormData({
+      riskTolerance: "",
+      investmentHorizon: "",
+      financialGoals: "",
+      startingCapital: "",
+    });
+  };
+
+  const acceptPortfolio = () => {
+    setShowModal(false);
+    savePortfolioToFirestore(generatedPortfolio.portfolioName, generatedPortfolio.portfolioData, generatedPortfolio.portfolioPoints, generatedPortfolio.chartData);
+  }
 
   return (
     <>
       <div>
-        <div>
-          {userData ? (<><h1>Welcome, {userData.name}!</h1></>) : (<p>No user data found.</p>)}
-        </div>
+        {loading && (
+          <div className="modal">
+            <div className="modal-content">
+              <div className="loader"></div>
+              <div className="modal-text">Generating Portfolio and Backtesting...</div>
+            </div>
+          </div>
+        )}
+        
+
+        <Modal
+          isOpen={showModal}
+          onClose={rejectPortfolio}
+          onConfirm={acceptPortfolio}
+          portfolio={generatedPortfolio}
+        />    
+      
+
         <form onSubmit={handleOpenAIRequest} className="investment-form">
           <h2 className="form-title">Investment Preferences</h2>
           
@@ -292,57 +310,6 @@ const Dashboard: React.FC = () => {
             Submit
           </button>
         </form>
-
-        {portfolioData && (
-          <div className="portfolio-output">
-            <ul>
-              {portfolioData.map((asset, index) => (
-                <li key={index}>
-                {asset.ticker} - {asset.weight * 100}%
-              </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {portfolioPoints && (
-          <div className="response-output">
-            {portfolioName && ( <div> <h3>{portfolioName}</h3> </div> )}
-            {chartData && (
-              <div className="chart-container">
-                <Line
-                  key={JSON.stringify(chartData)} // Use unique key to force re-render
-                  data={chartData}
-                  options={{
-                    responsive: false,
-                    maintainAspectRatio: true,
-                    plugins: {
-                      legend: {
-                        display: true,
-                        position: "top",
-                      },
-                    },
-                  }}
-                />
-              </div>
-            )}
-            <ul className="portfolio-list">
-              {portfolioPoints.map((point, index) => (
-                <li key={index} className="portfolio-item">
-                  <h4 className="portfolio-title">{point.title}</h4>
-                  <ul className="portfolio-subpoints">
-                    {point.subpoints.map((subpoint, subIndex) => (
-                      <div key={subIndex} className="portfolio-subpoint">
-                        {subpoint}
-                      </div>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
       </div>
     </>
   );

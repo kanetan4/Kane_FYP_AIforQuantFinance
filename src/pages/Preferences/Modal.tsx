@@ -1,8 +1,15 @@
-import React from "react";
 import "./modal.css"
 import { Line } from "react-chartjs-2";
+import { ChartDataset } from "chart.js";
 
-const Modal = ({ isOpen, onClose, onConfirm, portfolio }) => {
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  portfolio: any | null; // Ideally, replace `any` with a proper type
+}
+
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onConfirm, portfolio }) => {
   if (!isOpen || !portfolio) return null;
 
   return (
@@ -18,7 +25,7 @@ const Modal = ({ isOpen, onClose, onConfirm, portfolio }) => {
                   key={JSON.stringify(portfolio.chartData)} // Use unique key to force re-render
                   data={{
                     ...portfolio.chartData,
-                    datasets: portfolio.chartData.datasets.map((dataset) => ({
+                    datasets: portfolio.chartData.datasets.map((dataset: ChartDataset<"line">) => ({
                       ...dataset,
                       borderColor: "rgba(54, 162, 235, 1)", // Blue line color
                       backgroundColor: "rgba(54, 162, 235, 0.2)", // Light fill color
@@ -46,7 +53,7 @@ const Modal = ({ isOpen, onClose, onConfirm, portfolio }) => {
         )}
 
         <ul>
-          {portfolio.portfolioPoints.map((point, index) => (
+          {portfolio.portfolioPoints.map((point:{title:string; subpoints:string[]}, index) => (
             <li key={index}>
               <strong>{point.title}</strong>
               <ul>

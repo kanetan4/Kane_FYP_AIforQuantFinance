@@ -74,7 +74,7 @@ const Dashboard: React.FC = () => {
                 </div>
             )}
             <ul className="portfolio-list">
-                {portfolioPoints.map((point, index) => (
+                {portfolioPoints.map((point:{title:string; subpoints:string[]}, index) => (
                 <li key={index} className="portfolio-item">
                     <h4 className="portfolio-title">{point.title}</h4>
                     <ul className="portfolio-subpoints">

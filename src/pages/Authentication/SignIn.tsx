@@ -60,7 +60,7 @@ const SignIn: React.FC = () => {
         // Signed in 
         const user = userCredential.user;
         console.log(user)
-        navigate("/"); // Redirect to a protected route after successful sign-in
+        navigate("/preferences"); // Redirect to a protected route after successful sign-in
       })
       .catch((error) => {
         console.log(error.code)
@@ -78,7 +78,7 @@ const SignIn: React.FC = () => {
       console.log("Google Sign-In successful:", user);
 
       // Optionally redirect the user after successful sign-in
-      navigate("/"); // Change to your desired route
+      navigate("/preferences"); // Change to your desired route
     } catch (error: any) {
       console.error("Google Sign-In error:", error);
       setError(error.message);

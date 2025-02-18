@@ -70,7 +70,7 @@ const SignUp: React.FC = () => {
       setLoading(false);
 
       // Navigate to another page after successful sign-up
-      navigate("/"); // Update route as necessary
+      navigate("/preferences"); // Update route as necessary
     } catch (error: any) {
       console.error("Sign up error:", error);
       setError(error.message);
@@ -87,7 +87,7 @@ const SignUp: React.FC = () => {
       setLoading(false);
 
       // Navigate to another page after successful sign-up
-      navigate("/"); // Update route as necessary
+      navigate("/preferences"); // Update route as necessary
     } catch (error: any) {
       console.error("Google sign-up error:", error);
       setError(error.message);

@@ -8,9 +8,9 @@ import SignUp from './pages/Authentication/SignUp';
 import Analysis from './pages/Analysis/Analysis';
 import Alerts from './pages/Alerts/Alerts';
 import Chart from './pages/Chart';
-import Dashboard from './pages/Dashboard/Dashboard';
+import Dashboard from './pages/Preferences/Preferences';
 import Profile from './pages/Profile/Profile';
-import Preferences from './pages/Preferences/Preferences'
+import Preferences from './pages/Dashboard/Dashboard'
 import Settings from './pages/Settings';
 import DefaultLayout from './layout/DefaultLayout';
 import { AuthProvider } from './provider/AuthProvider';

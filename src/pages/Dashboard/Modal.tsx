@@ -14,6 +14,7 @@ const Modal = ({ isOpen, onClose, onConfirm, portfolio }) => {
         {portfolio.chartData && (
             <div className="chart-container">
               <Line
+                  className="line-chart"
                   key={JSON.stringify(portfolio.chartData)} // Use unique key to force re-render
                   data={{
                     ...portfolio.chartData,
@@ -21,16 +22,18 @@ const Modal = ({ isOpen, onClose, onConfirm, portfolio }) => {
                       ...dataset,
                       borderColor: "rgba(54, 162, 235, 1)", // Blue line color
                       backgroundColor: "rgba(54, 162, 235, 0.2)", // Light fill color
-                      borderWidth: 3, // Thicker line
-                      pointRadius: 5, // Larger points
+                      borderWidth: 1, // Thicker line
+                      pointRadius: 3, // Larger points
                       pointBackgroundColor: "rgba(255, 99, 132, 1)", // Red point color
                       pointHoverRadius: 7, // Bigger hover effect
                       tension: 0.4, // Smooth curves
                     })),
                   }}
+                  style={{width:'500px', height:'250px'}}
                   options={{
                     responsive: false,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
+                    // aspectRatio: 1,
                     plugins: {
                         legend: {
                         display: true,

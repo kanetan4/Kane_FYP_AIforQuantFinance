@@ -70,7 +70,7 @@ const Dashboard: React.FC = () => {
             labels: performance.map((item) => item.date), // X-axis labels (dates)
             datasets: [
               {
-                label: "Portfolio Performance",
+                label: "Portfolio Performance (Starting with $10000)",
                 data: performance.map((item) => item.value), // Y-axis data (portfolio value)
                 borderColor: "rgba(75,192,192,1)",
                 backgroundColor: "rgba(75,192,192,0.2)",

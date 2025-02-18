@@ -150,7 +150,12 @@ const Preferences: React.FC = () => {
     "Cash": "BIL",
   };
 
-  const retryBacktestPortfolio = async (portfolio, maxRetries = 5) => {
+  interface PortfolioAsset {
+    ticker: string;
+    weight: number;
+  }
+  
+  const retryBacktestPortfolio = async (portfolio: PortfolioAsset[], maxRetries = 5) => {
     let attempts = 0;
     let performanceData = null;
 
@@ -189,7 +194,7 @@ const Preferences: React.FC = () => {
           const assetClass = match[2].trim(); // Extract asset class
           const weight = parseFloat(match[3]) / 100; // Convert percentage to decimal
   
-          const ticker = assetClassToTicker[assetClass];
+          const ticker = assetClassToTicker[assetClass as keyof typeof assetClassToTicker];
           if (ticker) {
             portfolioData.push({ ticker, weight });
           } else {

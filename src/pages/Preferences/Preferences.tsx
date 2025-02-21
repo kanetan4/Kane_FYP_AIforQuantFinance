@@ -24,7 +24,7 @@ const Preferences: React.FC = () => {
     riskTolerance: "",
     investmentHorizon: "",
     financialGoals: "",
-    startingCapital: "",
+    startingCapital: 0,
   });
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -33,7 +33,11 @@ const Preferences: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "startingCapital" ? parseInt(value, 10) || 0 : value, // Convert startingCapital to integer
+    }));
   };
 
   const handleOpenAIRequest = async (e: React.FormEvent) => {
@@ -60,7 +64,7 @@ const Preferences: React.FC = () => {
       const response = await callOpenAI(messages);
       const aiResponse = response.choices[0].message.content;
       console.log("OpenAI response:", aiResponse);
-      const parsedData = parseOpenAIResponse(aiResponse);
+      const parsedData = parseOpenAIResponse(aiResponse, formData.startingCapital);
   
       // Fetch historical performance for the portfolio
       console.log("PORTFOLIO DATA HEREE  ",parsedData.portfolioData)
@@ -99,7 +103,7 @@ const Preferences: React.FC = () => {
 
   const savePortfolioToFirestore = async (
     portfolioName: string,
-    portfolioData: { ticker: string; weight: number }[],
+    portfolioData: { ticker: string; value: number }[],
     portfolioPoints: { title: string; subpoints: string[] }[],
     chartData: any
   ) => {
@@ -152,18 +156,30 @@ const Preferences: React.FC = () => {
 
   interface PortfolioAsset {
     ticker: string;
-    weight: number;
+    value: number;
   }
   
   const retryBacktestPortfolio = async (portfolio: PortfolioAsset[], maxRetries = 5) => {
     let attempts = 0;
-    let performanceData = null;
 
     while (attempts < maxRetries) {
         try {
-            performanceData = await backtestPortfolio(portfolio);
+            // performanceData = await backtestPortfolio(portfolio);
+            const response = await fetch("http://localhost:3002/api/backtestportfolio", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ portfolio })
+            });
+    
+            if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            const performanceData = await response.json();
             if (performanceData && performanceData.length > 0) {
-                return performanceData; // Successful fetch
+              return performanceData; // Successful fetch
             }
         } catch (error) {
             console.error(`Backtest failed (attempt ${attempts + 1}):`, error);
@@ -177,11 +193,11 @@ const Preferences: React.FC = () => {
   };
 
 
-  const parseOpenAIResponse = (message: string) => {
+  const parseOpenAIResponse = (message: string, startingCapital: number) => {
     const lines = message.split("\n").filter((line) => line.trim() !== ""); // Split lines and remove empty ones
     let portfolioName = "";
     const portfolioPoints: { title: string; subpoints: string[] }[] = [];
-    const portfolioData: { ticker: string; weight: number }[] = [];
+    const portfolioData: { ticker: string; value: number }[] = [];
   
     lines.forEach((line, index) => {
       line = line.replace(/[*#]/g, "").trim();
@@ -192,11 +208,12 @@ const Preferences: React.FC = () => {
         const match = line.match(/^(\d\.\s*)([a-zA-Z\s\-]+)\s*-\s*(\d+)%$/);
         if (match) {
           const assetClass = match[2].trim(); // Extract asset class
-          const weight = parseFloat(match[3]) / 100; // Convert percentage to decimal
+          // const weight = parseFloat(match[3]) / 100; 
+          const value = parseFloat(match[3]) / 100 * startingCapital; 
   
           const ticker = assetClassToTicker[assetClass as keyof typeof assetClassToTicker];
           if (ticker) {
-            portfolioData.push({ ticker, weight });
+            portfolioData.push({ ticker, value });
           } else {
             console.warn(`No ticker found for asset class: ${assetClass}`);
           }
@@ -221,7 +238,7 @@ const Preferences: React.FC = () => {
       riskTolerance: "",
       investmentHorizon: "",
       financialGoals: "",
-      startingCapital: "",
+      startingCapital: 0,
     });
   };
 

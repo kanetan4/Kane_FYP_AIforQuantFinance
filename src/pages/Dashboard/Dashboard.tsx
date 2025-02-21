@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext"
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
 import { Line } from "react-chartjs-2";
+import { ChartDataset } from "chart.js";
 import {
     Chart as ChartJS,
     LineElement,
@@ -53,42 +54,57 @@ const Dashboard: React.FC = () => {
   return (
     <div>
         {portfolioPoints && (
-            <div className="response-output">
-            {portfolioName && ( <div> <h3>{portfolioName}</h3> </div> )}
-            {chartData && (
-                <div className="chart-container">
+          <div className="response-output">
+          {portfolioName && ( <div> <h3>{portfolioName}</h3> </div> )}
+          {chartData && (
+              <div className="chart-container">
                 <Line
-                    key={JSON.stringify(chartData)} // Use unique key to force re-render
-                    data={chartData}
-                    options={{
+                  className="line-chart"
+                  key={JSON.stringify(chartData)} // Use unique key to force re-render
+                  data={{
+                    ...chartData,
+                    datasets: chartData.datasets.map((dataset: ChartDataset<"line">) => ({
+                      ...dataset,
+                      borderColor: "rgba(54, 162, 235, 1)", // Blue line color
+                      backgroundColor: "rgba(54, 162, 235, 0.2)", // Light fill color
+                      borderWidth: 1, // Thicker line
+                      pointRadius: 3, // Larger points
+                      pointBackgroundColor: "rgba(255, 99, 132, 1)", // Red point color
+                      pointHoverRadius: 7, // Bigger hover effect
+                      tension: 0.4, // Smooth curves
+                    })),
+                  }}
+                  style={{width:'500px', height:'250px'}}
+                  options={{
                     responsive: false,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: false,
+                    // aspectRatio: 1,
                     plugins: {
                         legend: {
                         display: true,
                         position: "top",
                         },
                     },
-                    }}
-                />
-                </div>
-            )}
-            <ul className="portfolio-list">
-                {portfolioPoints.map((point:{title:string; subpoints:string[]}, index) => (
-                <li key={index} className="portfolio-item">
-                    <h4 className="portfolio-title">{point.title}</h4>
-                    <ul className="portfolio-subpoints">
-                    {point.subpoints.map((subpoint, subIndex) => (
-                        <div key={subIndex} className="portfolio-subpoint">
-                        {subpoint}
-                        </div>
-                    ))}
-                    </ul>
-                </li>
-                ))}
-            </ul>
+                  }}
+              />
             </div>
-        )}
+          )}
+          <ul className="portfolio-list">
+              {portfolioPoints.map((point:{title:string; subpoints:string[]}, index) => (
+              <li key={index} className="portfolio-item">
+                  <h4 className="portfolio-title">{point.title}</h4>
+                  <ul className="portfolio-subpoints">
+                  {point.subpoints.map((subpoint, subIndex) => (
+                      <div key={subIndex} className="portfolio-subpoint">
+                      {subpoint}
+                      </div>
+                  ))}
+                  </ul>
+              </li>
+              ))}
+          </ul>
+          </div>
+      )}
     </div>
   )
 }

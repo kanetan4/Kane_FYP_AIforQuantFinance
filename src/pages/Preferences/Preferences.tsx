@@ -68,16 +68,16 @@ const Preferences: React.FC = () => {
   
       // Fetch historical performance for the portfolio
       console.log("PORTFOLIO DATA HEREE  ",parsedData.portfolioData)
-      const performance = await retryBacktestPortfolio(parsedData.portfolioData);
+      const { performanceData, finalShares } = await retryBacktestPortfolio(parsedData.portfolioData);
       console.log("performance:",performance);
 
-      const chartData = performance.length
+      const chartData = performanceData.length
         ? {
-            labels: performance.map((item) => item.date), // X-axis labels (dates)
+            labels: performanceData.map((item) => item.date), // X-axis labels (dates)
             datasets: [
               {
-                label: "Portfolio Performance (Starting with $10000)",
-                data: performance.map((item) => item.value), // Y-axis data (portfolio value)
+                label: "Portfolio Performance",
+                data: performanceData.map((item) => item.value), // Y-axis data (portfolio value)
                 borderColor: "rgba(75,192,192,1)",
                 backgroundColor: "rgba(75,192,192,0.2)",
               },
@@ -87,7 +87,7 @@ const Preferences: React.FC = () => {
       
       setGeneratedPortfolio({
         portfolioName: parsedData.portfolioName,
-        portfolioData: parsedData.portfolioData,
+        portfolioData: finalShares,
         portfolioPoints: parsedData.portfolioPoints,
         chartData: chartData,
       });
@@ -103,7 +103,7 @@ const Preferences: React.FC = () => {
 
   const savePortfolioToFirestore = async (
     portfolioName: string,
-    portfolioData: { ticker: string; value: number }[],
+    portfolioData: { ticker: string; value: number, quantity: number }[],
     portfolioPoints: { title: string; subpoints: string[] }[],
     chartData: any
   ) => {
@@ -178,8 +178,12 @@ const Preferences: React.FC = () => {
             }
     
             const performanceData = await response.json();
-            if (performanceData && performanceData.length > 0) {
-              return performanceData; // Successful fetch
+
+            const { portfolio_performance, final_shares } = performanceData;
+
+            if (portfolio_performance && portfolio_performance.length > 0) {
+              console.log("Final Shares Data:", final_shares); // Debugging purpose
+              return { performanceData: portfolio_performance, finalShares: final_shares }; // Successful fetch
             }
         } catch (error) {
             console.error(`Backtest failed (attempt ${attempts + 1}):`, error);

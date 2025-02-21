@@ -52,7 +52,7 @@ def backtest_portfolio(portfolio):
         first_price = next(entry["price"] for entry in historical_data[ticker] if entry["date"] == sorted_dates[0])
         
         # Compute number of shares
-        shares[ticker] = initial_value / first_price
+        shares[ticker] = float(initial_value / first_price)
 
     print("Initial Shares Allocation:", shares)
 
@@ -69,21 +69,23 @@ def backtest_portfolio(portfolio):
                 total_value += shares[ticker] * price  # Compute current value
 
         portfolio_performance.append({"date": date, "value": float(total_value)})
-    print(portfolio_performance)
+    # print(portfolio_performance)
+    final_shares = []
+
+    for asset in portfolio:
+        ticker = asset["ticker"]
+        current_value = asset["value"]
+        current_price = historical_data[ticker][-1]['price']  # Get the latest price
+        quantity = float(current_value / current_price)  # Calculate number of shares
+
+        # Append the structured dictionary to the list
+        final_shares.append({
+            "ticker": ticker,
+            "value": current_value,
+            "quantity": quantity
+        })
+
+    # Print or return final_shares to verify
+    print(final_shares)
     print("✅ Portfolio backtest complete!")
-    return portfolio_performance
-
-
-# Example portfolio: $3000 in AAPL, $2000 in TSLA, $5000 in MSFT
-portfolio = [
-    {"ticker": "AAPL", "value": 3000},
-    {"ticker": "TSLA", "value": 2000},
-    {"ticker": "MSFT", "value": 5000},
-]
-
-# Run backtest
-# performance = backtest_portfolio(portfolio)
-
-# Convert to DataFrame and display
-# df = pd.DataFrame(performance)
-# print(df)
+    return portfolio_performance, final_shares

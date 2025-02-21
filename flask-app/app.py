@@ -33,15 +33,11 @@ def getnews():
 def backtestportfolio():
     data = request.get_json()
     portfolio = data["portfolio"]
-    # portfolio = [
-    #     {"ticker": "AAPL", "value": 3000},
-    #     {"ticker": "TSLA", "value": 2000},
-    #     {"ticker": "MSFT", "value": 5000},
-    # ]
-    results = backtest_portfolio(portfolio)
-    return results
-    # return "TEST"
+    portfolio_performance, final_shares = backtest_portfolio(portfolio)
+    return jsonify({
+        "portfolio_performance": portfolio_performance,
+        "final_shares": final_shares
+    })
     
-
 if __name__ == '__main__':
     app.run(debug=True, port=3002)

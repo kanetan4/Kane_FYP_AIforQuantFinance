@@ -11,6 +11,7 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onConfirm, portfolio }) => {
   if (!isOpen || !portfolio) return null;
+  console.log("chart data hereeee",portfolio.chartData);
 
   return (
     <div className="modal">
@@ -66,8 +67,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onConfirm, portfolio }) 
         </ul>
 
         <div className="modal-buttons">
-          <button onClick={onConfirm} className="confirm-button">Accept</button>
           <button onClick={onClose} className="reject-button">Reject</button>
+          <button onClick={onConfirm} className="confirm-button">Accept</button>
         </div>
       </div>
     </div>

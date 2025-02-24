@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import './preferences.css';
 import { callOpenAI } from "../../api/openai";
-import { backtestPortfolio } from "../../api/backtest";
 import {
   Chart as ChartJS,
   LineElement,
@@ -105,7 +104,8 @@ const Preferences: React.FC = () => {
     portfolioName: string,
     portfolioData: { ticker: string; value: number, quantity: number }[],
     portfolioPoints: { title: string; subpoints: string[] }[],
-    chartData: any
+    chartData: any,
+    portfolioValue: number,
   ) => {
     const user = auth.currentUser; // Get the currently logged-in user
   
@@ -117,6 +117,9 @@ const Preferences: React.FC = () => {
     try {
       // Reference to the user's document in Firestore
       const userRef = doc(db, "users", user.uid);
+
+      const timestamp = new Date().toISOString();
+      const initialHistory = [{ timestamp, value: portfolioValue }];
   
       // Save portfolio data under the user's Firestore document
       await setDoc(
@@ -127,10 +130,12 @@ const Preferences: React.FC = () => {
             data: portfolioData,
             points: portfolioPoints,
             chart: chartData,
+            currentValue: portfolioValue,
+            history: initialHistory,
             timestamp: new Date(), // Save timestamp for tracking
           },
         },
-        { merge: true } // Prevents overwriting existing user data
+        { merge: true }
       );
   
       console.log("Portfolio successfully saved to Firestore.");
@@ -248,7 +253,7 @@ const Preferences: React.FC = () => {
 
   const acceptPortfolio = () => {
     setShowModal(false);
-    savePortfolioToFirestore(generatedPortfolio.portfolioName, generatedPortfolio.portfolioData, generatedPortfolio.portfolioPoints, generatedPortfolio.chartData);
+    savePortfolioToFirestore(generatedPortfolio.portfolioName, generatedPortfolio.portfolioData, generatedPortfolio.portfolioPoints, generatedPortfolio.chartData, formData.startingCapital);
     navigate("/");
   }
 

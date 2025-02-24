@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./dashboard.css"
 import { useAuth } from "../../context/AuthContext"
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
 import { Line } from "react-chartjs-2";
 import { ChartDataset } from "chart.js";
@@ -22,89 +22,103 @@ const Dashboard: React.FC = () => {
   const [portfolioName, setPortfolioName] = useState<string | null>(null);
   const [portfolioPoints, setPortfolioPoints] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any | null>(null);
-  const { user, userData, loading, logout } = useAuth();
+  const [history, setHistory] = useState<{ timestamp: string; value: number }[]>([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!user) return; // Ensure user is logged in
 
-    const fetchPortfolio = async () => {
+    const fetchAndUpdatePortfolio = async () => {
       try {
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
         
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          console.log(userData.portfolio);
-          setPortfolioName(userData.portfolio.name || "My Portfolio");
-          setPortfolioPoints(userData.portfolio.points || []);
-          setChartData(userData.portfolio.chart || null);
-        } else {
+        if (!userSnap.exists()) {
           console.error("No portfolio data found for this user.");
+          return;
         }
+
+        const userData = userSnap.data();
+        let currentPortfolio = userData.portfolio || {};
+
+        console.log("Current Portfolio:", currentPortfolio);
+
+        // 1️⃣ Make API Call to Update Portfolio History
+        const response = await fetch("http://localhost:3002/api/retrieveportfoliohistory", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ portfolio: currentPortfolio }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const { portfolio_performance, updated_portfolio_data } = await response.json();
+        console.log("Updated Portfolio Data:", updated_portfolio_data);
+        console.log("New Portfolio Performance:", portfolio_performance);
+
+        // 2️⃣ Merge New History with Existing History
+        const newHistory = [...(currentPortfolio.history || []), ...portfolio_performance];
+
+        // 3️⃣ Update Firestore with New Data
+        await updateDoc(userRef, {
+          "portfolio.data": updated_portfolio_data,  // Replace with updated stock values
+          "portfolio.history": newHistory,  // Append new history
+        });
+
+        // 4️⃣ Update State
+        setHistory(newHistory);
+        setPortfolioName(currentPortfolio.name || "My Portfolio");
+        setPortfolioPoints(currentPortfolio.points || []);
+        setChartData(currentPortfolio.chart || null);
       } catch (error) {
-        console.error("Error fetching portfolio data:", error);
-      } finally {
-        console.log("final");
+        console.error("Error updating portfolio:", error);
       }
     };
 
-    fetchPortfolio();
-  }, [user]);
+    fetchAndUpdatePortfolio();
+  }, [user]); // Runs when user logs in
+
+  const historicalChartData = {
+    labels: history.map((entry) => new Date(entry.timestamp).toLocaleDateString()), // X-axis: Dates
+    datasets: [
+      {
+        label: "Portfolio Value",
+        data: history.map((entry) => entry.value), // Y-axis: Portfolio Value
+        borderColor: "rgba(54, 162, 235, 1)", // Blue line
+        backgroundColor: "rgba(54, 162, 235, 0.2)", // Light fill color
+        borderWidth: 2, // Thicker line
+        pointRadius: 3, // Larger points
+        pointBackgroundColor: "rgba(255, 99, 132, 1)", // Red points
+        pointHoverRadius: 7, // Bigger hover effect
+        tension: 0.4, // Smooth curves
+      },
+    ],
+  };
 
   return (
     <div>
-        {portfolioPoints && (
-          <div className="response-output">
-          {portfolioName && ( <div> <h3>{portfolioName}</h3> </div> )}
-          {chartData && (
-              <div className="chart-container">
-                <Line
-                  className="line-chart"
-                  key={JSON.stringify(chartData)} // Use unique key to force re-render
-                  data={{
-                    ...chartData,
-                    datasets: chartData.datasets.map((dataset: ChartDataset<"line">) => ({
-                      ...dataset,
-                      borderColor: "rgba(54, 162, 235, 1)", // Blue line color
-                      backgroundColor: "rgba(54, 162, 235, 0.2)", // Light fill color
-                      borderWidth: 1, // Thicker line
-                      pointRadius: 3, // Larger points
-                      pointBackgroundColor: "rgba(255, 99, 132, 1)", // Red point color
-                      pointHoverRadius: 7, // Bigger hover effect
-                      tension: 0.4, // Smooth curves
-                    })),
-                  }}
-                  style={{width:'500px', height:'250px'}}
-                  options={{
-                    responsive: false,
-                    maintainAspectRatio: false,
-                    // aspectRatio: 1,
-                    plugins: {
-                        legend: {
-                        display: true,
-                        position: "top",
-                        },
-                    },
-                  }}
+       <div>
+          <h2>Portfolio Performance</h2>
+          {history.length > 0 ? (
+            <div className="chart-container">
+              <Line
+                className="line-chart"
+                data={historicalChartData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: true, position: "top" },
+                  },
+                }}
               />
             </div>
+          ) : (
+            <p>Loading portfolio performance...</p>
           )}
-          <ul className="portfolio-list">
-              {portfolioPoints.map((point:{title:string; subpoints:string[]}, index) => (
-              <li key={index} className="portfolio-item">
-                  <h4 className="portfolio-title">{point.title}</h4>
-                  <ul className="portfolio-subpoints">
-                  {point.subpoints.map((subpoint, subIndex) => (
-                      <div key={subIndex} className="portfolio-subpoint">
-                      {subpoint}
-                      </div>
-                  ))}
-                  </ul>
-              </li>
-              ))}
-          </ul>
-          </div>
-      )}
+        </div>
     </div>
   )
 }

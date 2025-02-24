@@ -1,19 +1,146 @@
 import yfinance as yf
-import pandas as pd
+from datetime import datetime, timedelta
 
-def fetch_historical_data(ticker, start="2010-01-01"):
+def compute_portfolio_performance(portfolio, historical_data):
+    """
+    Computes the portfolio's value over time based on historical prices.
+    Supports mixed intervals (15m and 60m).
+    """
+    # Step 1: Collect All Available Timestamps
+    all_timestamps = set()
+    for data in historical_data.values():
+        all_timestamps.update(entry["timestamp"] for entry in data)
+
+    sorted_timestamps = sorted(list(all_timestamps))  # Sort in ascending order
+
+    if not sorted_timestamps:
+        print("⚠️ No common historical data found.")
+        return []
+
+    print(f"✅ Aligning data from {sorted_timestamps[0]} to {sorted_timestamps[-1]}")
+
+    # Step 2: Compute Portfolio Value Over Time Using Stored Quantities
+    portfolio_performance = []
+
+    for timestamp in sorted_timestamps:
+        total_value = 0  # Initialize total portfolio value
+
+        for asset in portfolio["data"]:
+            ticker = asset["ticker"]
+            quantity = asset["quantity"]  # Quantity remains unchanged
+
+            # Find stock price for this timestamp
+            asset_data = next((entry for entry in historical_data[ticker] if entry["timestamp"] == timestamp), None)
+            if asset_data:
+                price = asset_data["price"]
+                total_value += quantity * price  # Compute portfolio value at this timestamp
+
+        portfolio_performance.append({
+            "timestamp": timestamp,  # Use actual timestamp from historical data
+            "value": round(total_value, 2)  # Round to 2 decimal places
+        })
+
+    return portfolio_performance
+
+
+def fetch_historical_data(type, ticker, interval, start="2010-01-01"):
     """
     Fetch historical monthly stock prices from Yahoo Finance.
     """
     stock = yf.Ticker(ticker)
-    hist = stock.history(period="max", interval="1d", start=start)
+    hist = stock.history(period="max", interval=interval, start=start)
 
     if hist.empty:
         print(f"⚠️ No data found for {ticker}")
         return []
 
     # Convert DataFrame to a list of dictionaries
-    return [{"date": date.strftime("%Y-%m-%d"), "price": row["Close"]} for date, row in hist.iterrows()]
+    if type == "backtest":
+        return [{"date": date.strftime("%Y-%m-%d"), "price": row["Close"]} for date, row in hist.iterrows()]
+    else:
+        return [{"timestamp": date.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "price": row["Close"]} for date, row in hist.iterrows()]
+
+def fetch_full_historical_data(ticker, start):
+    """
+    Fetch historical data in chunks based on API limitations.
+    - Uses 60-minute (`60m`) data for periods > 60 days ago.
+    - Uses 15-minute (`15m`) data for the last 60 days.
+    """
+    historical_data = []
+    end_date = datetime.today()  # Current date
+    current_start = datetime.strptime(start, "%Y-%m-%d")
+
+    while current_start < end_date:
+        # If the start date is more than 60 days ago, use `60m`
+        days_ago = (end_date - current_start).days
+        interval = "60m" if days_ago > 60 else "15m"
+
+        # Set max range based on interval (60 days for 60m, 60 days for 15m)
+        next_end = min(current_start + timedelta(days=59), end_date)  # Ensure max 60-day window
+
+        print(f"Fetching {interval} data for {ticker} from {current_start.date()} to {next_end.date()}...")
+
+        # Fetch data for this range
+        chunk_data = fetch_historical_data("", ticker, interval, start=current_start.strftime("%Y-%m-%d"))
+        historical_data.extend(chunk_data)
+
+        # Move start to next batch
+        current_start = next_end
+
+    return historical_data
+
+
+def update_portfolio_history(portfolio):
+    """
+    Updates portfolio performance over time by:
+    1. Pulling historical data from the last recorded timestamp.
+    2. Calculating the portfolio value over time based on stored quantity.
+    3. Returning updated history data and latest portfolio values.
+    """
+
+    # Extract historical start date from last recorded entry
+    if "history" in portfolio and portfolio["history"]:
+        last_entry = portfolio["history"][-1]
+        start_date = last_entry["timestamp"][:10]  # Extract YYYY-MM-DD
+    else:
+        print("⚠️ No history found, using default start date.")
+        start_date = "2025-01-01"
+
+    print(f"Fetching historical data from {start_date}...")
+
+    historical_data = {}
+
+    # Fetch new historical data for each asset
+    for asset in portfolio["data"]:
+        ticker = asset["ticker"]
+        print(f"Fetching data for {ticker}...")
+        historical_data[ticker] = fetch_full_historical_data(ticker, start=start_date)
+        print(f"✅ Data for {ticker}: {len(historical_data[ticker])} entries.")
+        
+    if len(historical_data[ticker]) == 0:
+        return [], portfolio['data']
+
+    portfolio_performance = compute_portfolio_performance(portfolio, historical_data)
+    
+    # Update Portfolio Data with Latest Prices
+    updated_portfolio_data = []
+
+    for asset in portfolio["data"]:
+        ticker = asset["ticker"]
+        quantity = asset["quantity"]
+        if historical_data[ticker]:
+            
+            latest_price = historical_data[ticker][-1]['price']  # Get latest price
+        
+        updated_ticker_data = {
+            "ticker": ticker,
+            "quantity": quantity,
+            "value": round(quantity * latest_price, 2)  # Latest calculated value
+        }
+        updated_portfolio_data.append(updated_ticker_data)
+
+    print("✅ Portfolio history updated successfully!")
+    return portfolio_performance, updated_portfolio_data
 
 def backtest_portfolio(portfolio):
     """
@@ -28,7 +155,7 @@ def backtest_portfolio(portfolio):
     for asset in portfolio:
         ticker = asset["ticker"]
         print(f"Fetching data for {ticker}...")
-        historical_data[ticker] = fetch_historical_data(ticker)  # Function to get historical prices
+        historical_data[ticker] = fetch_historical_data("backtest",ticker, "1d")  # Function to get historical prices
         print(historical_data[ticker][:10])
 
     print("✅ Raw historical data fetched")

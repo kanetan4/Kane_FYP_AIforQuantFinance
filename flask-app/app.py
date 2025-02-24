@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from news_scrapper import fetch_news_for_keywords
 from summarizer import summarize_news
-from backtest import backtest_portfolio
+from backtest import backtest_portfolio, update_portfolio_history
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend-backend communication
@@ -37,6 +37,18 @@ def backtestportfolio():
     return jsonify({
         "portfolio_performance": portfolio_performance,
         "final_shares": final_shares
+    })
+
+@app.route('/api/retrieveportfoliohistory', methods=["GET", "POST"])
+def retrieveportfoliohistory():
+    data = request.get_json()
+    portfolio = data["portfolio"]
+    print(portfolio)
+    print(update_portfolio_history(portfolio))
+    portfolio_performance, updated_portfolio_data = update_portfolio_history(portfolio)
+    return jsonify({
+        "portfolio_performance": portfolio_performance,
+        "updated_portfolio_data": updated_portfolio_data
     })
     
 if __name__ == '__main__':

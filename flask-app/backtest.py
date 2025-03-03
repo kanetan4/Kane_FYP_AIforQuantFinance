@@ -218,8 +218,9 @@ def backtest_portfolio(portfolio):
         # Append the structured dictionary to the list
         final_shares.append({
             "ticker": ticker,
+            "startvalue":current_value,
             "value": current_value,
-            "quantity": quantity
+            "quantity": quantity,
         })
 
     # Print or return final_shares to verify

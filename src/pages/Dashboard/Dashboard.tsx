@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext"
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
 import { Line } from "react-chartjs-2";
-import { ChartDataset } from "chart.js";
+import PortfolioTable from "./PortfolioTable"
 import {
     Chart as ChartJS,
     LineElement,
@@ -20,9 +20,9 @@ ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip,
 
 const Dashboard: React.FC = () => {
   const [portfolioName, setPortfolioName] = useState<string | null>(null);
-  const [portfolioPoints, setPortfolioPoints] = useState<any[]>([]);
-  const [chartData, setChartData] = useState<any | null>(null);
   const [history, setHistory] = useState<{ timestamp: string; value: number }[]>([]);
+  const [portfolioHoldings, setPortfolioHoldings] = useState<{ ticker: string; quantity: number; value:number, startvalue:number}[]>([]);
+  const [startValue, setStartValue] = useState<number | 0>(0);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -57,6 +57,7 @@ const Dashboard: React.FC = () => {
         const { portfolio_performance, updated_portfolio_data } = await response.json();
         console.log("Updated Portfolio Data:", updated_portfolio_data);
         console.log("New Portfolio Performance:", portfolio_performance);
+        // console.log("HISTORY",history[history.length - 1].value)
 
         // 2️⃣ Merge New History with Existing History
         const newHistory = [...(currentPortfolio.history || []), ...portfolio_performance];
@@ -68,10 +69,11 @@ const Dashboard: React.FC = () => {
         });
 
         // 4️⃣ Update State
-        setHistory(newHistory);
+        setHistory(currentPortfolio.history);
+        setStartValue(currentPortfolio.currentValue);
         setPortfolioName(currentPortfolio.name || "My Portfolio");
-        setPortfolioPoints(currentPortfolio.points || []);
-        setChartData(currentPortfolio.chart || null);
+        setPortfolioHoldings(updated_portfolio_data || currentPortfolio.data);
+
       } catch (error) {
         console.error("Error updating portfolio:", error);
       }
@@ -100,7 +102,7 @@ const Dashboard: React.FC = () => {
   return (
     <div>
        <div>
-          <h2>Portfolio Performance</h2>
+       <h2 className="text-lg font-bold mb-2">{portfolioName}</h2>
           {history.length > 0 ? (
             <div className="chart-container">
               <Line
@@ -119,6 +121,36 @@ const Dashboard: React.FC = () => {
             <p>Loading portfolio performance...</p>
           )}
         </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          
+          <p className="text-xl font-semibold">
+            My Portfolio (USD) {history?.[history.length - 1]?.value ? `$${history[history.length - 1].value.toFixed(2)}` : "Loading..."}
+          </p>
+
+          {history?.[history.length - 1]?.value && (
+            (() => {
+              const currentValue = history[history.length - 1].value;
+              const pnl = currentValue - startValue;
+              const pnlPercentage = ((pnl / startValue) * 100).toFixed(2);
+              const isProfit = pnl >= 0;
+
+              return (
+                <p className={`text-md font-semibold flex items-center ${isProfit ? "text-green-600" : "text-red-600"}`}>
+                  {isProfit ? (
+                    <>
+                      ▲ PnL: +${pnl.toFixed(2)} (+{pnlPercentage}%)
+                    </>
+                  ) : (
+                    <>
+                      ▼ PnL: -${Math.abs(pnl).toFixed(2)} ({pnlPercentage}%)
+                    </>
+                  )}
+                </p>
+              );
+            })()
+          )}
+        </div>
+        <PortfolioTable portfolioHoldings={portfolioHoldings}></PortfolioTable>
     </div>
   )
 }

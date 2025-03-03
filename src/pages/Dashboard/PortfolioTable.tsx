@@ -72,16 +72,16 @@ const PortfolioTable = ({ portfolioHoldings }) => {
             {sortedHoldings.map((holding, index) => {
               const startValue = holding.startvalue;
               const currentValue = holding.value;
-              const pnl = currentValue - startValue;
-              const pnlPercentage = ((pnl / startValue) * 100).toFixed(2);
+              const pnl = currentValue * holding.quantity - startValue;
+              const pnlPercentage = ((pnl / startValue) * 100);
               const isProfit = pnl >= 0;
 
               return (
                 <tr key={index} className="border-b">
                   <td className="py-2 px-4">{holding.ticker}</td>
-                  <td className="py-2 px-4">{holding.quantity.toFixed(2)}</td>
-                  <td className="py-2 px-4">${startValue.toFixed(2)}</td>
-                  <td className="py-2 px-4">${currentValue.toFixed(2)}</td>
+                  <td className="py-2 px-4">{holding.quantity}</td>
+                  <td className="py-2 px-4">${startValue}</td>
+                  <td className="py-2 px-4">${currentValue * holding.quantity}</td>
                   <td
                     className={`py-2 px-4 font-semibold flex items-center ${
                       isProfit ? "text-green-600" : "text-red-600"
@@ -89,11 +89,11 @@ const PortfolioTable = ({ portfolioHoldings }) => {
                   >
                     {isProfit ? (
                       <>
-                        ▲ +${pnl.toFixed(2)} (+{pnlPercentage}%)
+                        ▲ +${pnl} (+{pnlPercentage}%)
                       </>
                     ) : (
                       <>
-                        ▼ -${Math.abs(pnl).toFixed(2)} ({pnlPercentage}%)
+                        ▼ -${Math.abs(pnl)} ({pnlPercentage}%)
                       </>
                     )}
                   </td>

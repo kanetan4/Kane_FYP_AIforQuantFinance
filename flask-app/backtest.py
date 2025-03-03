@@ -140,12 +140,13 @@ def update_portfolio_history(portfolio):
         if historical_data[ticker]:
             latest_price = historical_data[ticker][-1]['price']  # Get latest price
         else:
-            latest_price = 0
-        
+            latest_price = asset["value"]
+        print(asset)
         updated_ticker_data = {
             "ticker": ticker,
             "quantity": quantity,
-            "value": round(quantity * latest_price, 2)  # Latest calculated value
+            "value": latest_price,
+            "startvalue": asset["startvalue"]
         }
         updated_portfolio_data.append(updated_ticker_data)
 
@@ -211,15 +212,15 @@ def backtest_portfolio(portfolio):
 
     for asset in portfolio:
         ticker = asset["ticker"]
-        current_value = asset["value"]
+        start_value = asset["value"]
         current_price = historical_data[ticker][-1]['price']  # Get the latest price
-        quantity = float(current_value / current_price)  # Calculate number of shares
+        quantity = float(start_value / current_price)  # Calculate number of shares
 
         # Append the structured dictionary to the list
         final_shares.append({
             "ticker": ticker,
-            "startvalue":current_value,
-            "value": current_value,
+            "startvalue": start_value,
+            "value": current_price,
             "quantity": quantity,
         })
 

@@ -102,7 +102,7 @@ const Preferences: React.FC = () => {
 
   const savePortfolioToFirestore = async (
     portfolioName: string,
-    portfolioData: { ticker: string; paidvalue:number; value: number; quantity: number }[],
+    portfolioData: { ticker: string; paidvalue: number; value: number; quantity: number }[],
     portfolioPoints: { title: string; subpoints: string[] }[],
     chartData: any,
     portfolioValue: number,

@@ -102,9 +102,11 @@ def update_portfolio_history(portfolio):
     if "history" in portfolio and portfolio["history"]:
         last_entry = portfolio["history"][-1]
         start_date = last_entry["timestamp"][:10]  # Extract YYYY-MM-DD
+        last_timestamp = last_entry["timestamp"]
     else:
         print("⚠️ No history found, using default start date.")
         start_date = "2025-01-01"
+        last_timestamp = None
 
     print(f"Fetching historical data from {start_date}...")
 
@@ -120,6 +122,13 @@ def update_portfolio_history(portfolio):
     if len(historical_data[ticker]) == 0:
         return [], portfolio['data']
 
+    if last_timestamp:
+        for ticker in historical_data:
+            historical_data[ticker] = [
+                entry for entry in historical_data[ticker]
+                if entry["timestamp"] > last_timestamp
+            ]
+
     portfolio_performance = compute_portfolio_performance(portfolio, historical_data)
     
     # Update Portfolio Data with Latest Prices
@@ -129,8 +138,9 @@ def update_portfolio_history(portfolio):
         ticker = asset["ticker"]
         quantity = asset["quantity"]
         if historical_data[ticker]:
-            
             latest_price = historical_data[ticker][-1]['price']  # Get latest price
+        else:
+            latest_price = 0
         
         updated_ticker_data = {
             "ticker": ticker,

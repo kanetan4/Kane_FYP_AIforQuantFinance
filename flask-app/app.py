@@ -43,8 +43,6 @@ def backtestportfolio():
 def retrieveportfoliohistory():
     data = request.get_json()
     portfolio = data["portfolio"]
-    print(portfolio)
-    print(update_portfolio_history(portfolio))
     portfolio_performance, updated_portfolio_data = update_portfolio_history(portfolio)
     return jsonify({
         "portfolio_performance": portfolio_performance,

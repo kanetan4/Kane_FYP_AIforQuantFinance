@@ -5,8 +5,13 @@ interface RiskMetricProps {
   startValue: number;
 }
 
+export interface RiskMetricResult {
+  metric: number;
+  insight: string;
+}
+
 // 📊 Volatility Metric and Insight
-const calculateVolatility = (history: RiskMetricProps["history"]) => {
+const calculateVolatility = (history: RiskMetricProps["history"]): RiskMetricResult => {
   const returns = history.slice(1).map((entry, i) => (entry.value - history[i].value) / history[i].value);
   const mean = returns.reduce((acc, r) => acc + r, 0) / returns.length;
   const variance = returns.reduce((acc, r) => acc + Math.pow(r - mean, 2), 0) / returns.length;
@@ -25,7 +30,7 @@ const calculateVolatility = (history: RiskMetricProps["history"]) => {
 };
 
 // 📊 VaR Metric and Insight
-const calculateVaR = (history: RiskMetricProps["history"], startValue: number) => {
+const calculateVaR = (history: RiskMetricProps["history"], startValue: number): RiskMetricResult => {
   const volatility = calculateVolatility(history).metric / 100;
   const zScore = 1.65; // 95% confidence
   const meanReturn = (history[history.length - 1]?.value - startValue) / startValue;
@@ -43,8 +48,9 @@ const calculateVaR = (history: RiskMetricProps["history"], startValue: number) =
   return { metric: var95, insight };
 };
 
+
 // 📊 Max Drawdown Metric and Insight
-const calculateMaxDrawdown = (history: RiskMetricProps["history"]) => {
+const calculateMaxDrawdown = (history: RiskMetricProps["history"]): RiskMetricResult => {
   let peak = -Infinity;
   let maxDrawdown = 0;
   history.forEach((entry) => {

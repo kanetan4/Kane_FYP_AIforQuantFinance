@@ -6,6 +6,7 @@ import { db } from "../../../firebaseConfig";
 import { Line } from "react-chartjs-2";
 import PortfolioTable from "./PortfolioTable"
 import RiskMetric from "./RiskMetric"
+import Reccomendations from "./Recommendations"
 import {
     Chart as ChartJS,
     LineElement,
@@ -155,6 +156,7 @@ const Dashboard: React.FC = () => {
         )}
       </div>
       <PortfolioTable portfolioHoldings={portfolioHoldings}></PortfolioTable>
+      <Reccomendations/>
     </div>
   )
 }

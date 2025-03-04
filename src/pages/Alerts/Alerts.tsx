@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import Breadcrumb from "../../components/Breadcrumbs/Breadcrumb";
 import "./alerts.css";
 import { auth, db } from "../../../firebaseConfig";
-import { useAuth } from "../../context/AuthContext"
-import { collection, addDoc, serverTimestamp, doc, setDoc, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { collection, doc, setDoc, query, orderBy, limit, getDocs } from "firebase/firestore";
 
 const Alerts = () => {
   const [alerts, setAlerts] = useState<any[]>([]);

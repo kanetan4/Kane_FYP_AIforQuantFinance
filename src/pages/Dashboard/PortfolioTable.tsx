@@ -1,10 +1,22 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
-const PortfolioTable = ({ portfolioHoldings }) => {
-  // State for sorting
-  const [sortConfig, setSortConfig] = useState({ key: "", direction: "asc" });
+interface PortfolioHolding {
+    ticker: string;
+    quantity: number;
+    startvalue: number;
+    value: number;
+  }
+  
+interface PortfolioTableProps {
+    portfolioHoldings: PortfolioHolding[];
+}
 
-  // Function to sort data
+const PortfolioTable: React.FC<PortfolioTableProps> = ({ portfolioHoldings }) => {
+  const [sortConfig, setSortConfig] = useState<{ key: keyof PortfolioHolding | "pnl"; direction: "asc" | "desc" }>({
+    key: "" as keyof PortfolioHolding | "pnl",
+    direction: "asc",
+  });
+
   const sortedHoldings = [...portfolioHoldings].sort((a, b) => {
     if (sortConfig.key) {
       const aValue = sortConfig.key === "pnl" 
@@ -21,9 +33,8 @@ const PortfolioTable = ({ portfolioHoldings }) => {
     return 0;
   });
 
-  // Handle sort on header click
-  const handleSort = (key) => {
-    let direction = "asc";
+  const handleSort = (key: keyof PortfolioHolding | "pnl") => {
+    let direction: "asc" | "desc" = "asc";
     if (sortConfig.key === key && sortConfig.direction === "asc") {
       direction = "desc";
     }
@@ -72,16 +83,16 @@ const PortfolioTable = ({ portfolioHoldings }) => {
             {sortedHoldings.map((holding, index) => {
               const startValue = holding.startvalue;
               const currentValue = holding.value;
-              const pnl = currentValue * holding.quantity - startValue;
-              const pnlPercentage = ((pnl / startValue) * 100);
+              const pnl = parseFloat((currentValue * holding.quantity - startValue).toFixed(2));
+              const pnlPercentage = parseFloat(((pnl / startValue) * 100).toFixed(2));
               const isProfit = pnl >= 0;
 
               return (
                 <tr key={index} className="border-b">
                   <td className="py-2 px-4">{holding.ticker}</td>
-                  <td className="py-2 px-4">{holding.quantity}</td>
-                  <td className="py-2 px-4">${startValue}</td>
-                  <td className="py-2 px-4">${currentValue * holding.quantity}</td>
+                  <td className="py-2 px-4">{holding.quantity.toFixed(2)}</td>
+                    <td className="py-2 px-4">${startValue.toFixed(2)}</td>
+                    <td className="py-2 px-4">${(currentValue * holding.quantity).toFixed(2)}</td>
                   <td
                     className={`py-2 px-4 font-semibold flex items-center ${
                       isProfit ? "text-green-600" : "text-red-600"

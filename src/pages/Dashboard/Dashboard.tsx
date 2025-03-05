@@ -101,6 +101,19 @@ const Dashboard: React.FC = () => {
     ],
   };
 
+  const calculateCurrentValue = (holdings: { ticker: string; quantity: number; value: number; startvalue: number }[]) => {
+    if (holdings.length === 0) return 0;
+    const totalValue = holdings.reduce((total, holding) => total + holding.quantity * holding.value, 0);
+    return parseFloat(totalValue.toFixed(2));
+  };
+
+  const calculateCost = (holdings: { ticker: string; quantity: number; value: number; startvalue: number }[]) => {
+    if (holdings.length === 0) return 0;
+    const totalCost = holdings.reduce((total, holding) => total + holding.startvalue, 0);
+    return parseFloat(totalCost.toFixed(2));
+  };  
+  
+
   return (
     <div>
       <div style={{marginBottom:'3rem'}}>
@@ -128,13 +141,21 @@ const Dashboard: React.FC = () => {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
         
-        <p className="text-xl font-semibold">
-          My Portfolio (USD) {history?.[history.length - 1]?.value ? `$${history[history.length - 1].value.toFixed(2)}` : "Loading..."}
-        </p>
+      <p className="text-xl font-semibold">
+        My Portfolio (USD) ${
+          portfolioHoldings.length > 0 
+            ? portfolioHoldings
+                .reduce((total, holding) => total + holding.quantity * holding.value, 0)
+                .toFixed(2)
+            : "Loading..."
+        }
+      </p>
+
 
         {history?.[history.length - 1]?.value && (
           (() => {
-            const currentValue = history[history.length - 1].value;
+            const currentValue = calculateCurrentValue(portfolioHoldings);
+            const startValue = calculateCost(portfolioHoldings);
             const pnl = currentValue - startValue;
             const pnlPercentage = ((pnl / startValue) * 100).toFixed(2);
             const isProfit = pnl >= 0;

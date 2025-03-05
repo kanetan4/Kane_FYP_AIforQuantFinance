@@ -1,0 +1,126 @@
+.portfolio-table-container {
+    margin-top: 1.25rem;
+}
+
+.portfolio-table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+}
+
+.table-header th {
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    background-color: #f0f0f0;
+    border-bottom: 2px solid #ddd;
+}
+
+.table-row td {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.pnl {
+    font-weight: bold;
+}
+
+.text-green {
+    color: #16a34a; /* Green for profit */
+}
+
+.text-red {
+    color: #dc2626; /* Red for loss */
+}
+
+.action-buttons {
+    display: flex;
+    height:'100%';
+    gap: 0.5rem;
+}
+
+.buy-button {
+    background-color: #22c55e;
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.buy-button:hover {
+    background-color: #16a34a;
+}
+
+.sell-button {
+    background-color: #f87171;
+    color: #fff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.sell-button:hover {
+    background-color: #dc2626;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 24rem;
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.modal-label {
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 0.25rem;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.cancel-button {
+    background-color: #f0f0f0;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.confirm-button.buy {
+    background-color: #22c55e;
+    color: #fff;
+}
+
+.confirm-button.sell {
+    background-color: #f87171;
+    color: #fff;
+}
+
+.confirm-button:hover {
+    filter: brightness(0.9);
+}

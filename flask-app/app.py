@@ -3,6 +3,7 @@ from flask_cors import CORS
 from news_scrapper import fetch_news_for_keywords
 from summarizer import summarize_news
 from backtest import backtest_portfolio, update_portfolio_history
+import yfinance as yf
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend-backend communication
@@ -48,6 +49,17 @@ def retrieveportfoliohistory():
         "portfolio_performance": portfolio_performance,
         "updated_portfolio_data": updated_portfolio_data
     })
+
+@app.route('/api/get_price')
+def get_price():
+    ticker = request.args.get('ticker')
+    stock = yf.Ticker(ticker)
+    data = stock.history(period='1d')
+    if not data.empty:
+        current_price = data['Close'].iloc[-1]
+        return jsonify({'price': round(current_price, 2)})
+    else:
+        return jsonify({'price': None})
     
 if __name__ == '__main__':
     app.run(debug=True, port=3002)

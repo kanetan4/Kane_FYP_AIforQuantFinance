@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import Logo from '../../images/logo/logo.svg';
+import LOGO_BLUE from '../../images/logo_blue.png'
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -62,10 +63,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
       }`}
     >
       {/* <!-- SIDEBAR HEADER --> */}
-      <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
-        {/* <NavLink to="/">
-          <img src={Logo} alt="Logo" />
-        </NavLink> */}
+      <div className="flex items-center justify-between px-15 py-6.5 lg:py-5">
+        <NavLink to="/">
+          <img src={LOGO_BLUE} alt="Logo" />
+        </NavLink>
 
         <button
           ref={trigger}
@@ -269,14 +270,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
             </ul>
           </div>
 
-          {/* <!-- Others Group --> */}
-          <div>
+          {/* <div>
             <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
               OTHERS
             </h3>
 
             <ul className="mb-6 flex flex-col gap-1.5">
-              {/* <!-- Menu Item Chart --> */}
               <li>
                 <NavLink
                   to="/chart"
@@ -316,14 +315,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   Chart
                 </NavLink>
               </li>
-              {/* <!-- Menu Item Chart --> */}
 
               
 
             </ul>
-          </div>
+          </div> */}
         </nav>
-        {/* <!-- Sidebar Menu --> */}
       </div>
     </aside>
   );

@@ -6,6 +6,7 @@ import { doc, setDoc } from "firebase/firestore";
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import LogoDark from '../../images/logo/logo-dark.svg';
 import Logo from '../../images/logo/logo.svg';
+import LOGO_WHITE from '../../images/logo_white.png'
 import "./signup.css"
 
 const SignUp: React.FC = () => {
@@ -105,11 +106,10 @@ const SignUp: React.FC = () => {
             <div className="py-17.5 px-26 text-center">
               <Link className="mb-5.5 inline-block" to="/">
                 <img className="hidden dark:block" src={Logo} alt="Logo" />
-                <img className="dark:hidden" src={LogoDark} alt="Logo" />
+                <img className="dark:hidden" src={LOGO_WHITE} alt="Logo" />
               </Link>
               <p className="2xl:px-20">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit
-                suspendisse.
+                {/* Lorem ipsum dolor sit amet, consectetur adipiscing elit suspendisse. */}
               </p>
 
               <span className="mt-15 inline-block">
@@ -394,7 +394,7 @@ const SignUp: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="mb-6">
+                {/* <div className="mb-6">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
                     Telegram Handle
                   </label>
@@ -408,7 +408,7 @@ const SignUp: React.FC = () => {
                       className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     />
                   </div>
-                </div>
+                </div> */}
 
                 <div className="mb-5">
                   <button type="submit" value="emailSignUp" className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90">

@@ -62,12 +62,11 @@ const Header = (props: {
         </div>
 
 
-        <div className="flex items-center gap-3 2xsm:gap-7">
+        <div className="flex items-center gap-3 2xsm:gap-7" style={{ justifyContent: 'flex-end', width: '100%' }}>
           <ul className="flex items-center gap-2 2xsm:gap-4">
             {/* <!-- Dark Mode Toggler --> */}
             <DarkModeSwitcher />
             {/* <!-- Dark Mode Toggler --> */}
-
           </ul>
 
           {/* <!-- User Area --> */}

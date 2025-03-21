@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../../firebaseConfig"; // Import Firebase Auth
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-import LogoDark from '../../images/logo/logo-dark.svg';
 import Logo from '../../images/logo/logo.svg';
+import LOGO_WHITE from '../../images/logo_white.png'
 import "./signin.css"
 
 const SignIn: React.FC = () => {
@@ -95,13 +95,13 @@ const SignIn: React.FC = () => {
             <div className="py-17.5 px-26 text-center">
               <Link className="mb-5.5 inline-block" to="/">
                 <img className="hidden dark:block" src={Logo} alt="Logo" />
-                <img className="dark:hidden" src={LogoDark} alt="Logo" />
+                <img className="dark:hidden" src={LOGO_WHITE} alt="Logo" />
               </Link>
 
-              <p className="2xl:px-20">
+              {/* <p className="2xl:px-20">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit
                 suspendisse.
-              </p>
+              </p> */}
 
               <span className="mt-15 inline-block">
                 <svg

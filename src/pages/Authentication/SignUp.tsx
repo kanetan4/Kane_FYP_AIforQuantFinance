@@ -4,7 +4,6 @@ import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, User } 
 import { auth, googleProvider, db } from "../../../firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-import LogoDark from '../../images/logo/logo-dark.svg';
 import Logo from '../../images/logo/logo.svg';
 import LOGO_WHITE from '../../images/logo_white.png'
 import "./signup.css"

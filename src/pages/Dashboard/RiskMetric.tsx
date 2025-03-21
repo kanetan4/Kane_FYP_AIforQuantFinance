@@ -20,7 +20,7 @@ const calculateVolatility = (history: RiskMetricProps["history"]): RiskMetricRes
   let insight = "";
   if (volatility > 20) {
     insight = "High volatility indicates high risk.";
-  } else if (volatility < 10) {
+  } else if (volatility < 5) {
     insight = "Low volatility indicates low risk.";
   } else {
     insight = "Moderate volatility suggests balanced risk.";

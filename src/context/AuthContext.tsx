@@ -1,7 +1,6 @@
 import  { createContext, useContext } from "react";
 import { User } from "firebase/auth";
 
-// Define context type
 interface AuthContextType {
   user: User | null;
   userData: any | null;
@@ -9,10 +8,8 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
-// Create Context
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Custom hook for accessing the AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

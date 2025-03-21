@@ -16,7 +16,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onConfirm, portfolio }) 
   return (
     <div className="modal">
       <div className="modal-content">
-        <h3>Generated Investment Portfolio</h3>
+        {/* <h3>Generated Investment Portfolio</h3> */}
         <h4>{portfolio.portfolioName}</h4>
 
         {portfolio.chartData && (
@@ -37,16 +37,32 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, onConfirm, portfolio }) 
                       tension: 0.4, // Smooth curves
                     })),
                   }}
-                  style={{width:'500px', height:'250px'}}
+                  style={{width:'600px', height:'220px'}}
                   options={{
                     responsive: false,
                     maintainAspectRatio: false,
                     // aspectRatio: 1,
                     plugins: {
                         legend: {
-                        display: true,
+                        display: false,
                         position: "top",
                         },
+                    },
+                    scales: {
+                      x: {
+                        ticks: {
+                          font: {
+                            size: 6, // Adjust the font size for x-axis labels
+                          },
+                        },
+                      },
+                      y: {
+                        ticks: {
+                          font: {
+                            size: 6, // Adjust the font size for x-axis labels
+                          },
+                        },
+                      },
                     },
                   }}
               />

@@ -92,6 +92,7 @@ interface PortfolioHolding {
     quantity: number;
     value: number;
     startvalue: number;
+    target: string;
 }
 
 interface RiskMetricProps {
@@ -247,16 +248,47 @@ const Recommendations: React.FC = () => {
 
 
 
-    const userInput = `Based on the following data, provide 3 actionable investment recommendations:
+    // const userInput = `Based on the following data, provide 3 actionable investment recommendations:
+    // - Risk Analysis:
+    //   - Volatility: ${volatility}%
+    //   - Value at Risk (95% confidence): ${var95}%
+    //   - Max Drawdown: ${maxDrawdown}%
+    // - Portfolio Holdings:
+    //   ${portfolio.map((holding) => 
+    //     `- ${holding.ticker}: ${holding.quantity} shares, 
+    //     Current Value: $${holding.value.toFixed(2)}, 
+    //     Targeted Allocation: ${holding.target}`).join("\n")}
+    // - News of the Day: 
+    //   ${news.articles.map((article) => `- ${article.topic}: ${article.article}`).join("\n")}
+    // Recommendations should focus on observing the market and news, risk management, potential gains, and asset allocation strategies. 
+    // Each recommendation should be a short and actionable sentence.`;
+    
+    const userInput = `Based on the following data, provide 3 actionable rebalancing recommendations using the Constant Mix Rebalancing strategy in just 3 points with no other content. 
+                       This strategy aims to rebalance the portfolio to its target asset allocations by adjusting the weights back to their 
+                       predefined levels, ensuring the portfolio stays aligned with the target composition while respecting tolerance ranges 
+                       for each asset class.
     - Risk Analysis:
-      - Volatility: ${volatility}%
-      - Value at Risk (95% confidence): ${var95}%
-      - Max Drawdown: ${maxDrawdown}%
+        - Volatility: ${volatility}%
+        - Value at Risk (95% confidence): ${var95}%
+        - Max Drawdown: ${maxDrawdown}%
+
     - Portfolio Holdings:
-      ${portfolio.map((holding) => `- ${holding.ticker}: ${holding.quantity} shares, Current Value: $${holding.value.toFixed(2)}`).join("\n")}
-    - News of the Day: 
-      ${news.articles.map((article) => `- ${article.topic}: ${article.article}`).join("\n")}
-    Recommendations should focus on observing the market and news, risk management, potential gains, and asset allocation strategies. Each recommendation should be a short and actionable sentence.`;
+        ${portfolio.map((holding) => 
+          `- ${holding.ticker}: ${holding.quantity} shares, 
+           Current Value: $${holding.value.toFixed(2)}, 
+           Targeted Allocation: ${holding.target}`).join("\n")}
+      
+    - News of the Day:
+        ${news.articles.map((article) => `- ${article.topic}: ${article.article}`).join("\n")}
+
+     Instructions for Rebalancing Strategy:
+
+    1. Focus on rebalancing the portfolio back to the target weights for each asset class, staying within the specified tolerance ranges.
+    2. For each asset class, adjust the quantities or allocation percentages to re-align with the target, ensuring that the changes respect 
+       the tolerance range of 10%.
+    3. Factor in current market conditions (such as news articles) and how they might impact specific asset classes.
+    4. Provide short, actionable sentences for each recommendation, ensuring that the strategy is aligned with the portfolio's overall risk 
+       tolerance, financial goals, and the latest news insights.`;
 
     const messages = [
       { role: "system", content: "You are a financial investment assistant." },
@@ -285,7 +317,7 @@ const Recommendations: React.FC = () => {
 
   return (
     <div className="recommendations-container">
-      <h2 className="text-lg font-bold mb-2">Latest News</h2>
+      {/* <h2 className="text-lg font-bold mb-2">Latest News</h2> */}
       {loading ? (
         <div>Loading latest news...</div>
       ) : news ? (
@@ -304,33 +336,19 @@ const Recommendations: React.FC = () => {
         <div>No news available.</div>
       )}
 
-    <section className="recommendations-section mt-6 p-4 bg-white shadow-md rounded-lg dark:bg-gray-800">
-        <h3 className="text-lg font-bold mb-3 text-gray-800 dark:text-gray-200 border-b pb-2">
-            📋 Personalised Recommendations
+    <section className="recommendations-section">
+        <h3 className="news-header">
+            Personalised Recommendations
         </h3>
         {recommendations ? (
-            <ul className="recommendations-list space-y-2">
+            <ul className="recommendations-list">
             {recommendations.map((rec, index) => (
-                <li
+              <li
                 key={index}
-                className="recommendation-item text-sm text-green-700 dark:text-green-400 flex items-start"
-                >
-                <svg
-                    className="w-5 h-5 text-white-500 mr-2 mt-[2px]"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                >
-                    <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 13l4 4L19 7"
-                    ></path>
-                </svg>
+                className="recommendation-item"
+              >
                 {removeAsterisks(rec)} {/* Cleaned text without asterisks */}
-                </li>
+              </li>
             ))}
             </ul>
         ) : (

@@ -25,7 +25,89 @@ const Dashboard: React.FC = () => {
   const [history, setHistory] = useState<{ timestamp: string; value: number }[]>([]);
   const [portfolioHoldings, setPortfolioHoldings] = useState<{ ticker: string; quantity: number; value:number, startvalue:number}[]>([]);
   const [startValue, setStartValue] = useState<number | 0>(0);
+  const [timeRange, setTimeRange] = useState<'1d' | '1w' | '1m' | '1y'>('1w');
+  const [historicalChartData, setHistoricalChartData] = useState<any>(null);
+  const [chartOptions, setChartOptions] = useState<any>(null);
   const { user } = useAuth();
+
+  const calculateMinMax = (data: { timestamp: string; value: number }[]) => {
+    const values = data.map(item => item.value);
+    return { min: Math.min(...values), max: Math.max(...values) };
+  };
+
+  // Effect to update the chart data and handle filtering and zooming
+  useEffect(() => {
+    const filteredData = filterDataByRange(timeRange);
+
+    const chartData = {
+      labels: filteredData.map((entry) => new Date(entry.timestamp).toLocaleDateString()), // X-axis: Dates
+      datasets: [
+        {
+          label: "Portfolio Value",
+          data: filteredData.map((entry) => entry.value), // Y-axis: Portfolio Value
+          borderColor: "rgba(54, 162, 235, 1)", // Blue line
+          backgroundColor: "rgba(54, 162, 235, 0.2)", // Light fill color
+          borderWidth: 2, // Thicker line
+          pointRadius: 3, // Larger points
+          pointBackgroundColor: "rgba(255, 99, 132, 1)", // Red points
+          pointHoverRadius: 7, // Bigger hover effect
+          tension: 0.4, // Smooth curves
+        },
+      ],
+    };
+
+    // Set chart options with dynamic min/max values
+    const { min, max } = calculateMinMax(filteredData);
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: "top" },
+      },
+      scales: {
+        y: {
+          min, // Dynamic zoom based on the filtered data
+          max, // Dynamic zoom based on the filtered data
+        },
+      },
+    };
+
+    setHistoricalChartData(chartData);
+    setChartOptions(chartOptions);
+  }, [timeRange, history]);
+
+  const filterDataByRange = (range: string) => {
+    const currentDate = new Date();
+    let filteredData = [...history];
+
+    if (range === '1d') {
+      filteredData = filteredData.filter(item => {
+        const itemDate = new Date(item.timestamp);
+        const diff = (currentDate.getTime() - itemDate.getTime()) / (1000 * 3600 * 24); // Difference in days
+        return diff <= 1;
+      });
+    } else if (range === '1w') {
+      filteredData = filteredData.filter(item => {
+        const itemDate = new Date(item.timestamp);
+        const diff = (currentDate.getTime() - itemDate.getTime()) / (1000 * 3600 * 24); // Difference in days
+        return diff <= 7;
+      });
+    } else if (range === '1m') {
+      filteredData = filteredData.filter(item => {
+        const itemDate = new Date(item.timestamp);
+        const diff = (currentDate.getTime() - itemDate.getTime()) / (1000 * 3600 * 24); // Difference in days
+        return diff <= 30;
+      });
+    } else if (range === '1y') {
+      filteredData = filteredData.filter(item => {
+        const itemDate = new Date(item.timestamp);
+        const diff = (currentDate.getTime() - itemDate.getTime()) / (1000 * 3600 * 24); // Difference in days
+        return diff <= 365;
+      });
+    }
+
+    return filteredData;
+  };
 
   useEffect(() => {
     if (!user) return; // Ensure user is logged in
@@ -42,6 +124,8 @@ const Dashboard: React.FC = () => {
 
         const userData = userSnap.data();
         let currentPortfolio = userData.portfolio || {};
+        setHistory(currentPortfolio.history);
+        setPortfolioHoldings(currentPortfolio.data);
 
         console.log("Current Portfolio:", currentPortfolio);
 
@@ -84,23 +168,6 @@ const Dashboard: React.FC = () => {
     fetchAndUpdatePortfolio();
   }, [user]); // Runs when user logs in
 
-  const historicalChartData = {
-    labels: history.map((entry) => new Date(entry.timestamp).toLocaleDateString()), // X-axis: Dates
-    datasets: [
-      {
-        label: "Portfolio Value",
-        data: history.map((entry) => entry.value), // Y-axis: Portfolio Value
-        borderColor: "rgba(54, 162, 235, 1)", // Blue line
-        backgroundColor: "rgba(54, 162, 235, 0.2)", // Light fill color
-        borderWidth: 2, // Thicker line
-        pointRadius: 3, // Larger points
-        pointBackgroundColor: "rgba(255, 99, 132, 1)", // Red points
-        pointHoverRadius: 7, // Bigger hover effect
-        tension: 0.4, // Smooth curves
-      },
-    ],
-  };
-
   const calculateCurrentValue = (holdings: { ticker: string; quantity: number; value: number; startvalue: number }[]) => {
     if (holdings.length === 0) return 0;
     const totalValue = holdings.reduce((total, holding) => total + holding.quantity * holding.value, 0);
@@ -118,23 +185,38 @@ const Dashboard: React.FC = () => {
     <div>
       <div style={{marginBottom:'3rem'}}>
         <h2 className="text-lg font-bold mb-2">{portfolioName}</h2>
-          {history.length > 0 ? (
-            <div className="chart-container">
-              <Line
-                className="line-chart"
-                data={historicalChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { display: true, position: "top" },
-                  },
-                }}
-              />
-            </div>
-          ) : (
-            <p>Loading portfolio performance...</p>
-          )}
+        <div>
+          <div>
+            Filter by:
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value as '1d' | '1w' | '1m' | '1y')}
+              style={{ marginLeft: '10px', padding: '5px' }}
+            >
+              <option value="1d">1 Day</option>
+              <option value="1w">1 Week</option>
+              <option value="1m">1 Month</option>
+              <option value="1y">1 Year</option>
+            </select>
+          </div>
+        </div>
+        {history.length > 0 ? (
+          <div className="chart-container">
+            <Line
+              className="line-chart"
+              data={historicalChartData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: true, position: "top" },
+                },
+              }}
+            />
+          </div>
+        ) : (
+          <p>Loading portfolio performance...</p>
+        )}
       </div>
       
       <RiskMetric history={history} startValue={startValue} />

@@ -1,5 +1,6 @@
 import yfinance as yf
 from datetime import datetime, timedelta
+import pandas as pd
 
 def compute_portfolio_performance(portfolio, historical_data):
     """
@@ -43,22 +44,91 @@ def compute_portfolio_performance(portfolio, historical_data):
     return portfolio_performance
 
 
+# def fetch_historical_data(type, ticker, interval, start="2025-01-01"):
+#     df = pdr.DataReader(ticker, "stooq", start=start)
+#     df = df.sort_index()    # Stooq returns descending by date
+#     rows = []
+#     for dt, row in df.iterrows():
+#         rows.append({
+#             "date": dt.strftime("%Y-%m-%d"),
+#             "price": row["Close"]
+#         })
+#     return rows
+
+
+import requests
+from datetime import datetime, timezone
+
 def fetch_historical_data(type, ticker, interval, start="2010-01-01"):
     """
-    Fetch historical monthly stock prices from Yahoo Finance.
+    Fetch daily (or intraday) history from Yahoo Finance’s public API.
+    Returns a list of dicts with keys: date, timestamp, price.
     """
-    stock = yf.Ticker(ticker)
-    hist = stock.history(period="max", interval=interval, start=start)
+    # 1) build the URL (you can adjust range= and interval= as needed)
+    url = (
+        f"https://query2.finance.yahoo.com/v8/finance/chart/{ticker}"
+        f"?range=max&interval={interval}"
+    )
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+    }
 
-    if hist.empty:
-        print(f"⚠️ No data found for {ticker}")
-        return []
+    # 2) fetch & parse JSON
+    resp = requests.get(url, headers=headers)
+    resp.raise_for_status()
+    data = resp.json()["chart"]["result"][0]
 
-    # Convert DataFrame to a list of dictionaries
-    if type == "backtest":
-        return [{"date": date.strftime("%Y-%m-%d"), "price": row["Close"]} for date, row in hist.iterrows()]
-    else:
-        return [{"timestamp": date.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "price": row["Close"]} for date, row in hist.iterrows()]
+    timestamps = data["timestamp"]                              # list of epoch seconds
+    closes     = data["indicators"]["quote"][0]["close"]       # list of close prices
+
+    # 3) filter & build rows
+    start_dt = datetime.fromisoformat(start).date()
+    rows = []
+
+    for ts, close in zip(timestamps, closes):
+        # skip any null prices
+        if close is None:
+            continue
+
+        # convert epoch→UTC datetime
+        dt = datetime.fromtimestamp(ts, tz=timezone.utc)
+        if dt.date() < start_dt:
+            continue
+
+        iso_ts   = dt.strftime("%Y-%m-%dT%H:%M:%S") + "Z"
+        date_str = dt.strftime("%Y-%m-%d")
+
+        rows.append({
+            "date":      date_str,
+            "timestamp": iso_ts,
+            "price":     float(close)
+        })
+
+    return rows
+
+
+
+# YFINANCE API - test once in awhile
+
+# def fetch_historical_data(type, ticker, interval, start="2025-01-01"):
+#     """
+#     Fetch historical monthly stock prices from Yahoo Finance.
+#     """
+#     stock = yf.Ticker(ticker)
+#     hist = stock.history(period="max", interval=interval, start=start)
+
+#     if hist.empty:
+#         print(f"⚠️ No data found for {ticker}")
+#         return []
+
+#     # Convert DataFrame to a list of dictionaries
+#     if type == "backtest":
+#         return [{"date": date.strftime("%Y-%m-%d"), "price": row["Close"]} for date, row in hist.iterrows()]
+#     else:
+#         return [{"timestamp": date.strftime("%Y-%m-%dT%H:%M:%S.%fZ"), "price": row["Close"]} for date, row in hist.iterrows()]
+
+
+
 
 def fetch_full_historical_data(ticker, start):
     """
@@ -73,7 +143,8 @@ def fetch_full_historical_data(ticker, start):
     while current_start < end_date:
         # If the start date is more than 60 days ago, use `60m`
         days_ago = (end_date - current_start).days
-        interval = "60m" if days_ago > 60 else "15m"
+        interval = "1d" 
+        # if days_ago > 60 else "15m"
 
         # Set max range based on interval (60 days for 60m, 60 days for 15m)
         next_end = min(current_start + timedelta(days=59), end_date)  # Ensure max 60-day window
@@ -105,7 +176,7 @@ def update_portfolio_history(portfolio):
         last_timestamp = last_entry["timestamp"]
     else:
         print("⚠️ No history found, using default start date.")
-        start_date = "2025-01-01"
+        start_date = "2025-03-01"
         last_timestamp = None
 
     print(f"Fetching historical data from {start_date}...")
@@ -166,7 +237,7 @@ def backtest_portfolio(portfolio):
     for asset in portfolio:
         ticker = asset["ticker"]
         print(f"Fetching data for {ticker}...")
-        historical_data[ticker] = fetch_historical_data("backtest",ticker, "1d")  # Function to get historical prices
+        historical_data[ticker] = fetch_historical_data("backtest",ticker, "15m")  # Function to get historical prices
         print(historical_data[ticker][:10])
 
     print("✅ Raw historical data fetched")

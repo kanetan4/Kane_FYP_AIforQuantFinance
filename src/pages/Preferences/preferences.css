@@ -183,9 +183,9 @@
   border-radius: 12px;
   box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.3);
   text-align: center;
-  min-width: 320px;
+  min-width: 80rem;
   animation: fadeIn 0.3s ease-in-out, slideDown 0.3s ease-in-out;
-  max-width: 80%;
+  width:100rem;
 }
 
 /* Loading Spinner */

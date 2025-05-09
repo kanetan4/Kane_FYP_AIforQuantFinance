@@ -36,11 +36,10 @@ const calculateVolatility = (history: RiskMetricProps["history"]): RiskMetricRes
 
 // 📊 VaR Metric and Insight
 const calculateVaR = (history: RiskMetricProps["history"], startValue: number): RiskMetricResult => {
-  // const volatility = calculateVolatility(history).metric / 100;
-  // const zScore = 1.65; // 95% confidence
-  // const meanReturn = (history[history.length - 1]?.value - startValue) / startValue;
-  // const var95 = parseFloat((meanReturn - zScore * volatility).toFixed(2));
-  const var95 = 0;
+  const volatility = calculateVolatility(history).metric / 100;
+  const zScore = 1.65; // 95% confidence
+  const meanReturn = (history[history.length - 1]?.value - startValue) / startValue;
+  const var95 = parseFloat((meanReturn - zScore * volatility).toFixed(2));
 
   let insight = "";
   let color = "";

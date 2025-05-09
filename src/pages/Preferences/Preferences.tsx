@@ -43,9 +43,17 @@ const Preferences: React.FC = () => {
     e.preventDefault();
     setLoading(true);
 
-    const userInput = `Using principles of Modern Portfolio Theory (MPT), create a realistic and well-diversified investment 
-      portfolio tailored to my preferences. The portfolio should focus on maximizing returns for a given level of risk 
-      tolerance while considering asset classes such as equities, bonds, real estate, and alternative investments. 
+    const userInput = `
+      Construct the portfolio according to these Modern Portfolio Theory (MPT) guidelines:
+      • Target the highest expected return for the stated risk tolerance (mean variance optimisation).
+      • Minimise unsystematic risk by selecting low correlation asset classes.
+      • Maintain global diversification across geography and sector.
+      • Constrain any single asset class to ≤ 50 % of total capital.
+      • Express all weights as whole portfolio percentages that add up to 100%.
+      
+      Create a realistic and well-diversified investment portfolio tailored to my preferences. 
+      The portfolio should focus on maximizing returns for a given level of risk tolerance while 
+      considering asset classes such as equities, bonds, real estate, and alternative investments. 
       Please ensure the portfolio is in this exact format:
       - A portfolio name.
       - 5 key portfolio points including allocation percentages in this exact format numbered 1-5 (eg. Equities - 50%) from 
